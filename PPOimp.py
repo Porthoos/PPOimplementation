@@ -109,18 +109,16 @@ class replay_buffer():
         self.a_logprob = np.zeros((args.batch_size, args.action_dim))
         self.r = np.zeros((args.batch_size, 1))
         self.s_ = np.zeros((args.batch_size, args.state_dim))
-        self.v = np.zeros((args.batch_size, args.state_dim))
         self.done = np.zeros((args.batch_size, 1))
         self.done_ = np.zeros((args.batch_size, 1))
         self.count = 0
 
-    def store(self, s, a, a_logprob, r, s_, v, done, done_):
+    def store(self, s, a, a_logprob, r, s_, done, done_):
         self.s[self.count] = s
         self.a[self.count] = a
         self.a_logprob[self.count] = a_logprob
         self.r[self.count] = r
         self.s_[self.count] = s_
-        self.v[self.count] = v
         self.done[self.count] = done
         self.done_[self.count] = done_
         self.count += 1
@@ -131,15 +129,14 @@ class replay_buffer():
         a_logprob = torch.tensor(self.a_logprob, dtype=torch.float)
         r = torch.tensor(self.r, dtype=torch.float)
         s_ = torch.tensor(self.s_, dtype=torch.float)
-        v = torch.tensor(self.v, dtype=torch.float)
         done = torch.tensor(self.done, dtype=torch.float)
         done_ = torch.tensor(self.done_, dtype=torch.float)
 
-        return s, a, a_logprob, r, s_, v, done, done_
+        return s, a, a_logprob, r, s_, done, done_
 
 
 class PPO_net():
-    def __int__(self, args, writer):
+    def __init__(self, args, writer):
         self.writer = writer
 
         self.policy_dist = args.policy_dist
@@ -192,8 +189,18 @@ class PPO_net():
                 a_logprob = dist.log_prob(a)  # The log probability density of the action
         return a.numpy().flatten(), a_logprob.numpy().flatten()
 
+
+    def lr_decay(self, total_steps):
+        lr_a = self.lr_a * (1 - total_steps / self.max_train_steps)
+        lr_c = self.lr_c * (1 - total_steps / self.max_train_steps)
+        for p in self.optimizer_actor.param_groups:
+            p['lr'] = lr_a
+        for p in self.optimizer_critic.param_groups:
+            p['lr'] = lr_c
+
+
     def update(self, replaybuffer, total_steps, observation_space, action_space):
-        s, a, a_logprob, r, s_, v, done, done_ = replaybuffer.numpy_to_tensor()
+        s, a, a_logprob, r, s_, done, done_ = replaybuffer.numpy_to_tensor()
         advantages = torch.zeros_like(r)
         gae = 0
 
@@ -209,7 +216,7 @@ class PPO_net():
                 gae = delta + self.gamma * self.lamda * gae * (1.0 - done[t])
                 advantages[t] = gae
 
-            returns = advantages + v
+            returns = advantages + vs
             if self.batch_adv_norm:
                 advantages = (advantages - advantages.mean()) / (1e-8 + advantages.std(self))
 
@@ -218,7 +225,7 @@ class PPO_net():
             batch_logprob = a_logprob.reshape(-1)
             batch_adv = advantages.reshape(-1)
             batch_return = returns.reshape(-1)
-            batch_v = v.reshape(-1)
+            batch_v = vs.reshape(-1)
 
             batch_idx = np.arange(self.batch_size)
             clipfracs = []
@@ -273,6 +280,10 @@ class PPO_net():
                 nn.utils.clip_grad_norm_(self.critic.parameters(), 0.5)
                 self.optimizer_critic.step()
 
+            y_pred, y_true = batch_v.numpy(), batch_return.numpy()
+            var_y = np.var(y_true)
+            explained_variance = np.nan if var_y == 0 else 1 - np.var(y_true - y_pred) / var_y
+
             self.lr_decay(total_steps)
 
             self.writer.add_scalar("charts/actor_learning_rate", self.optimizer_actor.param_groups[0]['lr'], total_steps)
@@ -283,6 +294,7 @@ class PPO_net():
             self.writer.add_scalar("losses/old_approx_kl", old_approx_kl.item(), total_steps)
             self.writer.add_scalar("losses/approx_kl", approx_kl.item(), total_steps)
             self.writer.add_scalar("losses/clip_fraction", np.mean(clipfracs), total_steps)
+            self.writer.add_scalar("losses/explained_variance", explained_variance, total_steps)
 
 
 

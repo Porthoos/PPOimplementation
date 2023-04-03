@@ -1,4 +1,4 @@
-from gym import spaces
+from gymnasium import spaces
 # import Paras
 import copy
 import math
@@ -9,9 +9,9 @@ from datetime import datetime
 
 import torch
 import numpy as np
-import gym
+import gymnasium as gym
 
-from gym import spaces
+from gymnasium import spaces
 import copy
 import math
 import os

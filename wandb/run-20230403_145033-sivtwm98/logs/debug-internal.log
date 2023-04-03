@@ -1,0 +1,85 @@
+2023-04-03 14:50:33,683 INFO    StreamThr :19672 [internal.py:wandb_internal():87] W&B internal server running at pid: 19672, started at: 2023-04-03 14:50:33.683175
+2023-04-03 14:50:33,686 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: status
+2023-04-03 14:50:33,713 INFO    WriterThread:19672 [datastore.py:open_for_write():85] open: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_145033-sivtwm98\run-sivtwm98.wandb
+2023-04-03 14:50:33,714 DEBUG   SenderThread:19672 [sender.py:send():336] send: header
+2023-04-03 14:50:33,766 DEBUG   SenderThread:19672 [sender.py:send():336] send: run
+2023-04-03 14:50:38,820 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:50:43,866 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:50:48,913 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:50:53,968 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:50:59,012 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:51:04,059 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:51:07,849 INFO    SenderThread:19672 [retry.py:__call__():172] Retry attempt failed:
+Traceback (most recent call last):
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 1348, in getresponse
+    response.begin()
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 316, in begin
+    version, status, reason = self._read_status()
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 277, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\socket.py", line 669, in readinto
+    return self._sock.recv_into(b)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
+    retries = retries.increment(
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
+    raise value
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
+    result = self._call_fn(*args, **kwargs)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
+    return self.client.execute(*args, **kwargs)  # type: ignore
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
+    result = self._get_result(document, *args, **kwargs)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
+    return self.transport.execute(document, *args, **kwargs)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
+    request = requests.post(self.url, **post_args)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
+    return request("post", url, data=data, json=json, **kwargs)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 578, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
+2023-04-03 14:51:09,108 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:51:14,156 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:51:19,210 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:51:24,260 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:51:29,316 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 14:51:34,346 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: cancel
+2023-04-03 14:51:34,347 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: cancel
+2023-04-03 14:51:34,347 DEBUG   SenderThread:19672 [sender.py:send():345] Record cancelled: run
+2023-04-03 14:51:34,347 DEBUG   HandlerThread:19672 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 14:51:38,319 INFO    MainThread:19672 [internal.py:handle_exit():77] Internal process exited
