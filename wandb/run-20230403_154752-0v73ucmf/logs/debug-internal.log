@@ -1,0 +1,275 @@
+2023-04-03 15:47:52,692 INFO    StreamThr :632 [internal.py:wandb_internal():87] W&B internal server running at pid: 632, started at: 2023-04-03 15:47:52.691714
+2023-04-03 15:47:52,694 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status
+2023-04-03 15:47:52,722 INFO    WriterThread:632 [datastore.py:open_for_write():85] open: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\run-0v73ucmf.wandb
+2023-04-03 15:47:52,723 DEBUG   SenderThread:632 [sender.py:send():336] send: header
+2023-04-03 15:47:52,769 DEBUG   SenderThread:632 [sender.py:send():336] send: run
+2023-04-03 15:47:54,726 INFO    SenderThread:632 [dir_watcher.py:__init__():219] watching files in: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files
+2023-04-03 15:47:54,727 INFO    SenderThread:632 [sender.py:_start_run_threads():1078] run started: 0v73ucmf with start time 1680508072.696712
+2023-04-03 15:47:54,728 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: summary_record
+2023-04-03 15:47:54,729 INFO    SenderThread:632 [sender.py:_save_file():1332] saving file wandb-summary.json with policy end
+2023-04-03 15:47:54,736 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: check_version
+2023-04-03 15:47:54,736 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: check_version
+2023-04-03 15:47:55,454 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: run_start
+2023-04-03 15:47:55,464 DEBUG   HandlerThread:632 [system_info.py:__init__():31] System info init
+2023-04-03 15:47:55,464 DEBUG   HandlerThread:632 [system_info.py:__init__():46] System info init done
+2023-04-03 15:47:55,464 INFO    HandlerThread:632 [system_monitor.py:start():183] Starting system monitor
+2023-04-03 15:47:55,464 INFO    SystemMonitor:632 [system_monitor.py:_start():147] Starting system asset monitoring threads
+2023-04-03 15:47:55,464 INFO    HandlerThread:632 [system_monitor.py:probe():204] Collecting system info
+2023-04-03 15:47:55,467 INFO    SystemMonitor:632 [interfaces.py:start():187] Started cpu monitoring
+2023-04-03 15:47:55,468 DEBUG   HandlerThread:632 [system_info.py:probe():195] Probing system
+2023-04-03 15:47:55,468 INFO    SystemMonitor:632 [interfaces.py:start():187] Started disk monitoring
+2023-04-03 15:47:55,469 INFO    SystemMonitor:632 [interfaces.py:start():187] Started memory monitoring
+2023-04-03 15:47:55,476 INFO    SystemMonitor:632 [interfaces.py:start():187] Started network monitoring
+2023-04-03 15:47:55,477 DEBUG   HandlerThread:632 [system_info.py:_probe_git():180] Probing git
+2023-04-03 15:47:55,569 DEBUG   HandlerThread:632 [system_info.py:_probe_git():188] Probing git done
+2023-04-03 15:47:55,569 DEBUG   HandlerThread:632 [system_info.py:probe():240] Probing system done
+2023-04-03 15:47:55,569 DEBUG   HandlerThread:632 [system_monitor.py:probe():213] {'os': 'Windows-10-10.0.19044-SP0', 'python': '3.8.13', 'heartbeatAt': '2023-04-03T07:47:55.468824', 'startedAt': '2023-04-03T07:47:52.668453', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': 'D:\\PycharmProjects\\PPOimplementation\\PPOmain.py', 'codePath': 'PPOmain.py', 'git': {'remote': 'https://github.com/Porthoos/PPOimplementation.git', 'commit': '03e6ea2312059e803cba9fe4ce8a5d196975ada5'}, 'email': 'aramiis@163.com', 'root': 'D:/PycharmProjects/PPOimplementation', 'host': 'DESKTOP-RPOI2A1', 'username': 'JinLab', 'executable': 'D:\\anaconda3\\envs\\STAR_DEPLOY\\python.exe', 'cpu_count': 4, 'cpu_count_logical': 8, 'cpu_freq': {'current': 3408.0, 'min': 0.0, 'max': 3408.0}, 'cpu_freq_per_core': [{'current': 3408.0, 'min': 0.0, 'max': 3408.0}], 'disk': {'total': 931.5097618103027, 'used': 37.415618896484375}, 'memory': {'total': 15.909587860107422}}
+2023-04-03 15:47:55,569 INFO    HandlerThread:632 [system_monitor.py:probe():214] Finished collecting system info
+2023-04-03 15:47:55,569 INFO    HandlerThread:632 [system_monitor.py:probe():217] Publishing system info
+2023-04-03 15:47:55,569 DEBUG   HandlerThread:632 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-04-03 15:47:55,570 DEBUG   HandlerThread:632 [system_info.py:_save_pip():67] Saving pip packages done
+2023-04-03 15:47:55,570 DEBUG   HandlerThread:632 [system_info.py:_save_conda():74] Saving list of conda packages installed into the current environment
+2023-04-03 15:47:55,733 INFO    Thread-17 :632 [dir_watcher.py:_on_file_created():278] file/dir created: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\requirements.txt
+2023-04-03 15:47:55,733 INFO    Thread-17 :632 [dir_watcher.py:_on_file_created():278] file/dir created: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\conda-environment.yaml
+2023-04-03 15:47:55,733 INFO    Thread-17 :632 [dir_watcher.py:_on_file_created():278] file/dir created: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\wandb-summary.json
+2023-04-03 15:48:09,584 DEBUG   HandlerThread:632 [system_info.py:_save_conda():86] Saving conda packages done
+2023-04-03 15:48:09,585 DEBUG   HandlerThread:632 [system_info.py:_save_code():89] Saving code
+2023-04-03 15:48:09,631 DEBUG   HandlerThread:632 [system_info.py:_save_code():110] Saving code done
+2023-04-03 15:48:09,631 DEBUG   HandlerThread:632 [system_info.py:_save_patches():127] Saving git patches
+2023-04-03 15:48:09,863 INFO    Thread-17 :632 [dir_watcher.py:_on_file_modified():295] file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\conda-environment.yaml
+2023-04-03 15:48:09,864 INFO    Thread-17 :632 [dir_watcher.py:_on_file_created():278] file/dir created: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\code\PPOmain.py
+2023-04-03 15:48:09,864 INFO    Thread-17 :632 [dir_watcher.py:_on_file_created():278] file/dir created: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\code
+2023-04-03 15:48:09,906 DEBUG   HandlerThread:632 [system_info.py:_save_patches():169] Saving git patches done
+2023-04-03 15:48:09,907 INFO    HandlerThread:632 [system_monitor.py:probe():219] Finished publishing system info
+2023-04-03 15:48:09,918 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:48:09,919 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:09,919 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:48:09,919 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:09,919 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:48:09,919 DEBUG   SenderThread:632 [sender.py:send():336] send: files
+2023-04-03 15:48:09,920 INFO    SenderThread:632 [sender.py:_save_file():1332] saving file wandb-metadata.json with policy now
+2023-04-03 15:48:09,920 INFO    SenderThread:632 [sender.py:_save_file():1332] saving file code\PPOmain.py with policy now
+2023-04-03 15:48:09,927 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: stop_status
+2023-04-03 15:48:09,927 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: stop_status
+2023-04-03 15:48:09,931 INFO    HandlerThread:632 [handler.py:handle_tbrecord():747] handling tbrecord: tbrecord {
+  log_dir: "runs/gym_STAR/My_Env-v1__PPOmain__1__1680508062"
+  save: true
+}
+control {
+  relay_id: "5b2010ad5cf348e89d220947670d1ec2"
+}
+_info {
+  stream_id: "0v73ucmf"
+}
+
+2023-04-03 15:48:09,943 DEBUG   HandlerThread:632 [config_util.py:dict_from_config_file():103] no default config file found in config-defaults.yaml
+2023-04-03 15:48:10,336 DEBUG   SenderThread:632 [sender.py:send():336] send: telemetry
+2023-04-03 15:48:10,336 DEBUG   SenderThread:632 [sender.py:send():336] send: tbrecord
+2023-04-03 15:48:10,343 DEBUG   SenderThread:632 [sender.py:send():336] send: exit
+2023-04-03 15:48:10,344 INFO    SenderThread:632 [sender.py:send_exit():559] handling exit code: 1
+2023-04-03 15:48:10,344 INFO    SenderThread:632 [sender.py:send_exit():561] handling runtime: 14
+2023-04-03 15:48:10,346 INFO    SenderThread:632 [sender.py:_save_file():1332] saving file wandb-summary.json with policy end
+2023-04-03 15:48:10,346 INFO    SenderThread:632 [sender.py:send_exit():567] send defer
+2023-04-03 15:48:10,346 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:10,346 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 0
+2023-04-03 15:48:10,347 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:10,347 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 0
+2023-04-03 15:48:10,348 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 1
+2023-04-03 15:48:10,348 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:10,348 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 1
+2023-04-03 15:48:10,349 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:10,349 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 1
+2023-04-03 15:48:10,349 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 2
+2023-04-03 15:48:10,349 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:10,349 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 2
+2023-04-03 15:48:10,349 INFO    HandlerThread:632 [system_monitor.py:finish():193] Stopping system monitor
+2023-04-03 15:48:10,350 DEBUG   SystemMonitor:632 [system_monitor.py:_start():161] Starting system metrics aggregation loop
+2023-04-03 15:48:10,351 DEBUG   SystemMonitor:632 [system_monitor.py:_start():168] Finished system metrics aggregation loop
+2023-04-03 15:48:10,351 DEBUG   SystemMonitor:632 [system_monitor.py:_start():172] Publishing last batch of metrics
+2023-04-03 15:48:10,351 INFO    HandlerThread:632 [interfaces.py:finish():199] Joined cpu monitor
+2023-04-03 15:48:10,352 INFO    HandlerThread:632 [interfaces.py:finish():199] Joined disk monitor
+2023-04-03 15:48:10,352 INFO    HandlerThread:632 [interfaces.py:finish():199] Joined memory monitor
+2023-04-03 15:48:10,352 INFO    HandlerThread:632 [interfaces.py:finish():199] Joined network monitor
+2023-04-03 15:48:10,353 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:10,353 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 2
+2023-04-03 15:48:10,354 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 3
+2023-04-03 15:48:10,354 DEBUG   SenderThread:632 [sender.py:send():336] send: stats
+2023-04-03 15:48:10,354 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:10,354 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 3
+2023-04-03 15:48:10,355 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:10,355 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 3
+2023-04-03 15:48:10,355 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 4
+2023-04-03 15:48:10,355 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:10,355 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 4
+2023-04-03 15:48:10,655 INFO    wandb-upload_1:632 [upload_job.py:push():118] Skipped uploading C:\Users\JinLab\AppData\Local\Temp\tmpgo8850giwandb\le54lmfy-code/PPOmain.py
+2023-04-03 15:48:10,871 INFO    Thread-17 :632 [dir_watcher.py:_on_file_modified():295] file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\wandb-summary.json
+2023-04-03 15:48:10,871 INFO    Thread-17 :632 [dir_watcher.py:_on_file_created():278] file/dir created: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\output.log
+2023-04-03 15:48:10,872 INFO    Thread-17 :632 [dir_watcher.py:_on_file_created():278] file/dir created: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\wandb-metadata.json
+2023-04-03 15:48:11,051 INFO    wandb-upload_0:632 [upload_job.py:push():138] Uploaded file C:\Users\JinLab\AppData\Local\Temp\tmpgo8850giwandb\3r36z6z1-wandb-metadata.json
+2023-04-03 15:48:13,005 INFO    Thread-17 :632 [dir_watcher.py:_on_file_modified():295] file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\output.log
+2023-04-03 15:48:14,207 DEBUG   Thread-35 :632 [tb_watcher.py:_process_events():274] Encountered tensorboard directory watcher error: [WinError 1314] 客户端没有所需的特权。: 'D:\\PycharmProjects\\PPOimplementation\\runs\\gym_STAR\\My_Env-v1__PPOmain__1__1680508062\\events.out.tfevents.1680508089.DESKTOP-RPOI2A1.2896.0' -> 'D:\\PycharmProjects\\PPOimplementation\\wandb\\run-20230403_154752-0v73ucmf\\files\\events.out.tfevents.1680508089.DESKTOP-RPOI2A1.2896.0'
+2023-04-03 15:48:25,069 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: poll_exit
+2023-04-03 15:48:25,070 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:48:25,071 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:25,071 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:48:25,072 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:25,072 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:48:25,227 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:25,227 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 4
+2023-04-03 15:48:25,227 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 5
+2023-04-03 15:48:25,227 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: poll_exit
+2023-04-03 15:48:25,227 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:25,227 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 5
+2023-04-03 15:48:25,228 DEBUG   SenderThread:632 [sender.py:send():336] send: summary
+2023-04-03 15:48:25,230 INFO    SenderThread:632 [sender.py:_save_file():1332] saving file wandb-summary.json with policy end
+2023-04-03 15:48:25,230 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:25,230 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 5
+2023-04-03 15:48:25,230 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 6
+2023-04-03 15:48:25,230 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:25,231 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 6
+2023-04-03 15:48:25,231 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:25,231 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 6
+2023-04-03 15:48:25,231 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 7
+2023-04-03 15:48:25,231 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:48:25,231 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:25,231 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 7
+2023-04-03 15:48:25,232 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:25,232 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 7
+2023-04-03 15:48:26,116 INFO    Thread-17 :632 [dir_watcher.py:_on_file_modified():295] file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\config.yaml
+2023-04-03 15:48:26,117 INFO    Thread-17 :632 [dir_watcher.py:_on_file_modified():295] file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\wandb-summary.json
+2023-04-03 15:48:26,130 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:26,413 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 8
+2023-04-03 15:48:26,414 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:26,414 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 8
+2023-04-03 15:48:26,415 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:26,415 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 8
+2023-04-03 15:48:26,449 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 9
+2023-04-03 15:48:26,449 DEBUG   SenderThread:632 [sender.py:send():336] send: artifact
+2023-04-03 15:48:26,451 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:26,451 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 9
+2023-04-03 15:48:27,128 INFO    Thread-17 :632 [dir_watcher.py:_on_file_modified():295] file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\output.log
+2023-04-03 15:48:31,173 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:36,228 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:41,274 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:46,291 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:51,336 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:55,923 INFO    wandb-upload_0:632 [upload_job.py:push():96] Uploaded file C:\Users\JinLab\AppData\Local\wandb\wandb\artifacts\staging\tmpjou9wffc
+2023-04-03 15:48:55,923 INFO    wandb-upload_1:632 [upload_job.py:push():96] Uploaded file C:\Users\JinLab\AppData\Local\wandb\wandb\artifacts\staging\tmpm1pw0o7z
+2023-04-03 15:48:56,383 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:48:58,254 INFO    SenderThread:632 [sender.py:send_artifact():1428] sent artifact job-https___github.com_Porthoos_PPOimplementation.git_PPOmain.py - {'id': 'QXJ0aWZhY3Q6NDEyNTg2NDI2', 'digest': '8f65274490a3c9821ce4f106acf0f021', 'state': 'PENDING', 'aliases': [], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjYwMTIzOTQ3', 'latestArtifact': None}, 'version': 'latest'}
+2023-04-03 15:48:58,254 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:58,254 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:48:58,254 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 9
+2023-04-03 15:48:58,255 INFO    SenderThread:632 [dir_watcher.py:finish():365] shutting down directory watcher
+2023-04-03 15:48:58,376 INFO    SenderThread:632 [dir_watcher.py:finish():395] scan: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files
+2023-04-03 15:48:58,376 INFO    SenderThread:632 [dir_watcher.py:finish():409] scan save: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\conda-environment.yaml conda-environment.yaml
+2023-04-03 15:48:58,377 INFO    SenderThread:632 [dir_watcher.py:finish():409] scan save: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\config.yaml config.yaml
+2023-04-03 15:48:58,380 INFO    SenderThread:632 [dir_watcher.py:finish():409] scan save: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\output.log output.log
+2023-04-03 15:48:58,383 INFO    SenderThread:632 [dir_watcher.py:finish():409] scan save: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\requirements.txt requirements.txt
+2023-04-03 15:48:58,384 INFO    SenderThread:632 [dir_watcher.py:finish():409] scan save: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\wandb-metadata.json wandb-metadata.json
+2023-04-03 15:48:58,385 INFO    SenderThread:632 [dir_watcher.py:finish():409] scan save: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\wandb-summary.json wandb-summary.json
+2023-04-03 15:48:58,389 INFO    SenderThread:632 [dir_watcher.py:finish():409] scan save: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\code\PPOmain.py code\PPOmain.py
+2023-04-03 15:48:58,389 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 10
+2023-04-03 15:48:58,392 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:48:58,392 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 10
+2023-04-03 15:48:58,396 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:48:58,396 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 10
+2023-04-03 15:48:58,396 INFO    SenderThread:632 [file_pusher.py:finish():164] shutting down file pusher
+2023-04-03 15:48:59,379 INFO    wandb-upload_4:632 [upload_job.py:push():138] Uploaded file D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\wandb-summary.json
+2023-04-03 15:49:00,179 INFO    wandb-upload_2:632 [upload_job.py:push():138] Uploaded file D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\output.log
+2023-04-03 15:49:01,437 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:03,440 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:06,468 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:08,472 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:11,506 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:13,500 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:16,536 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:17,881 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2073] upload_file exception https://storage.googleapis.com/wandb-production.appspot.com/aramiis/PPO_implementation/0v73ucmf/requirements.txt?Expires=1680594538&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=bzwTxLcE1NIAdM8lurmmHgbKKVvS1y0sgOn%2F3Ha7xJBixdSh1Li23x%2FIVNHeCbjAMUurexR9%2BSryFMA%2BedEwN4uWPx3DqWzimjaNb87XUyoxgr0oUxSS9h5LRbPEicdMP8NYL3B%2F7b97%2Ftjh%2BB%2FzGi5z8pu1mmQqorPzyolM%2BlGBpvk6KTL3rU%2FtYoyrklS0PaUNQM8OVSubwKIrgW%2BEUN8ucPTgq4IdMZGgxNCHnGWUWriurvB%2BKtCG9gt%2FFgmnyCfM0yUgwCJRJVBm1PdcTehOYQzc9%2F%2FIJYaF1KeMnKRV9xU6slmitDThU%2BEVkh7CTGBygH5%2BJOSrKdnM4jRiRg%3D%3D: ('Connection aborted.', TimeoutError(10060, '由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。', None, 10060, None))
+2023-04-03 15:49:17,890 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2075] upload_file request headers: {'User-Agent': 'python-requests/2.28.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '2298'}
+2023-04-03 15:49:17,890 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2077] upload_file response body: 
+2023-04-03 15:49:18,041 ERROR   wandb-upload_0:632 [internal_api.py:upload_file():2073] upload_file exception https://storage.googleapis.com/wandb-production.appspot.com/aramiis/PPO_implementation/0v73ucmf/conda-environment.yaml?Expires=1680594538&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=gQ43ECbLyrMCpGJQ9Tzx0MuW9ypXMu%2BboRSMYku%2B9%2FZ2qol3dYU9wh0AlFgugXX%2F4Uym%2FL17%2BJyPP3pclzMEnEutv%2BD0SFwbAMEECN3W72ul96fPSVKZ7RKepb8hsitkJX8V2LMDprrLrLus4sGk3qttkS8HXvRtznPB%2F2Fddh7cqXJNt8ClHCUfdgpZ9yzeu%2BwB0pILa%2B%2F6eoKrSm%2BzwqFNLw%2B13Hkckar6o2GwFgZN2uZ%2Fyzj4Iy1b6PecdAG1rpOQK7W%2BZd%2FGbw9T%2FdIcTrtnvUdYLOeRgz79r4a%2F6pmi6BmHXgQnHMeutp7NA6aNEp40a46TQ2iooZKvrXzrPw%3D%3D: ('Connection aborted.', TimeoutError(10060, '由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。', None, 10060, None))
+2023-04-03 15:49:18,041 ERROR   wandb-upload_0:632 [internal_api.py:upload_file():2075] upload_file request headers: {'User-Agent': 'python-requests/2.28.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '3668'}
+2023-04-03 15:49:18,041 ERROR   wandb-upload_0:632 [internal_api.py:upload_file():2077] upload_file response body: 
+2023-04-03 15:49:18,450 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2073] upload_file exception https://storage.googleapis.com/wandb-production.appspot.com/aramiis/PPO_implementation/0v73ucmf/config.yaml?Expires=1680594538&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=WOIACzt9PjYsczjG5DCj9mdbp%2FqQ0O4UWdjIZ190cKRgTSoDxl2773mwR0aDg6uKGlyeYD1fcXJJ8ZZeTkddE6lkDj3fskZbOGEbz9UKansiPZmb8afFrD%2FkFvje%2FpGPCwNw4Mgum2slHz%2Bf6lY5dR%2B3Ls0dCQ4PlHsZ%2BOJVAwPm1YHXl8I5TUtgcSeRQ%2BWyevuFtrcSJJmRw8gnKtxpjtDNp%2FRru5NXYmoEo8M1g9TteVFisT3Ay51e77x8jBXu7qGQmZvj5l3fgyMIJawCsG7mRdee3SEvtRPQrC%2B5H2n%2FyJV9UGpyxWjKS%2Be6b8lut2EN97kztkvR5kzATm0%2FPg%3D%3D: ('Connection aborted.', TimeoutError(10060, '由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。', None, 10060, None))
+2023-04-03 15:49:18,450 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2075] upload_file request headers: {'User-Agent': 'python-requests/2.28.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '1665'}
+2023-04-03 15:49:18,450 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2077] upload_file response body: 
+2023-04-03 15:49:18,542 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:19,724 INFO    wandb-upload_0:632 [upload_job.py:push():138] Uploaded file D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\conda-environment.yaml
+2023-04-03 15:49:21,576 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:23,579 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:26,623 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:28,628 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:31,670 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:33,684 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:36,687 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:38,386 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2073] upload_file exception https://storage.googleapis.com/wandb-production.appspot.com/aramiis/PPO_implementation/0v73ucmf/requirements.txt?Expires=1680594538&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=bzwTxLcE1NIAdM8lurmmHgbKKVvS1y0sgOn%2F3Ha7xJBixdSh1Li23x%2FIVNHeCbjAMUurexR9%2BSryFMA%2BedEwN4uWPx3DqWzimjaNb87XUyoxgr0oUxSS9h5LRbPEicdMP8NYL3B%2F7b97%2Ftjh%2BB%2FzGi5z8pu1mmQqorPzyolM%2BlGBpvk6KTL3rU%2FtYoyrklS0PaUNQM8OVSubwKIrgW%2BEUN8ucPTgq4IdMZGgxNCHnGWUWriurvB%2BKtCG9gt%2FFgmnyCfM0yUgwCJRJVBm1PdcTehOYQzc9%2F%2FIJYaF1KeMnKRV9xU6slmitDThU%2BEVkh7CTGBygH5%2BJOSrKdnM4jRiRg%3D%3D: ('Connection aborted.', TimeoutError(10060, '由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。', None, 10060, None))
+2023-04-03 15:49:38,386 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2075] upload_file request headers: {'User-Agent': 'python-requests/2.28.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '2298'}
+2023-04-03 15:49:38,386 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2077] upload_file response body: 
+2023-04-03 15:49:38,705 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:38,928 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2073] upload_file exception https://storage.googleapis.com/wandb-production.appspot.com/aramiis/PPO_implementation/0v73ucmf/config.yaml?Expires=1680594538&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=WOIACzt9PjYsczjG5DCj9mdbp%2FqQ0O4UWdjIZ190cKRgTSoDxl2773mwR0aDg6uKGlyeYD1fcXJJ8ZZeTkddE6lkDj3fskZbOGEbz9UKansiPZmb8afFrD%2FkFvje%2FpGPCwNw4Mgum2slHz%2Bf6lY5dR%2B3Ls0dCQ4PlHsZ%2BOJVAwPm1YHXl8I5TUtgcSeRQ%2BWyevuFtrcSJJmRw8gnKtxpjtDNp%2FRru5NXYmoEo8M1g9TteVFisT3Ay51e77x8jBXu7qGQmZvj5l3fgyMIJawCsG7mRdee3SEvtRPQrC%2B5H2n%2FyJV9UGpyxWjKS%2Be6b8lut2EN97kztkvR5kzATm0%2FPg%3D%3D: ('Connection aborted.', TimeoutError(10060, '由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。', None, 10060, None))
+2023-04-03 15:49:38,928 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2075] upload_file request headers: {'User-Agent': 'python-requests/2.28.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '1665'}
+2023-04-03 15:49:38,928 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2077] upload_file response body: 
+2023-04-03 15:49:41,720 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:43,745 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:46,786 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:48,803 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:51,823 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:53,836 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:49:56,859 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:49:58,888 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:50:00,219 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2073] upload_file exception https://storage.googleapis.com/wandb-production.appspot.com/aramiis/PPO_implementation/0v73ucmf/requirements.txt?Expires=1680594538&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=bzwTxLcE1NIAdM8lurmmHgbKKVvS1y0sgOn%2F3Ha7xJBixdSh1Li23x%2FIVNHeCbjAMUurexR9%2BSryFMA%2BedEwN4uWPx3DqWzimjaNb87XUyoxgr0oUxSS9h5LRbPEicdMP8NYL3B%2F7b97%2Ftjh%2BB%2FzGi5z8pu1mmQqorPzyolM%2BlGBpvk6KTL3rU%2FtYoyrklS0PaUNQM8OVSubwKIrgW%2BEUN8ucPTgq4IdMZGgxNCHnGWUWriurvB%2BKtCG9gt%2FFgmnyCfM0yUgwCJRJVBm1PdcTehOYQzc9%2F%2FIJYaF1KeMnKRV9xU6slmitDThU%2BEVkh7CTGBygH5%2BJOSrKdnM4jRiRg%3D%3D: ('Connection aborted.', TimeoutError(10060, '由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。', None, 10060, None))
+2023-04-03 15:50:00,219 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2075] upload_file request headers: {'User-Agent': 'python-requests/2.28.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '2298'}
+2023-04-03 15:50:00,219 ERROR   wandb-upload_3:632 [internal_api.py:upload_file():2077] upload_file response body: 
+2023-04-03 15:50:00,471 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2073] upload_file exception https://storage.googleapis.com/wandb-production.appspot.com/aramiis/PPO_implementation/0v73ucmf/config.yaml?Expires=1680594538&GoogleAccessId=wandb-production%40appspot.gserviceaccount.com&Signature=WOIACzt9PjYsczjG5DCj9mdbp%2FqQ0O4UWdjIZ190cKRgTSoDxl2773mwR0aDg6uKGlyeYD1fcXJJ8ZZeTkddE6lkDj3fskZbOGEbz9UKansiPZmb8afFrD%2FkFvje%2FpGPCwNw4Mgum2slHz%2Bf6lY5dR%2B3Ls0dCQ4PlHsZ%2BOJVAwPm1YHXl8I5TUtgcSeRQ%2BWyevuFtrcSJJmRw8gnKtxpjtDNp%2FRru5NXYmoEo8M1g9TteVFisT3Ay51e77x8jBXu7qGQmZvj5l3fgyMIJawCsG7mRdee3SEvtRPQrC%2B5H2n%2FyJV9UGpyxWjKS%2Be6b8lut2EN97kztkvR5kzATm0%2FPg%3D%3D: ('Connection aborted.', TimeoutError(10060, '由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。', None, 10060, None))
+2023-04-03 15:50:00,471 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2075] upload_file request headers: {'User-Agent': 'python-requests/2.28.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '1665'}
+2023-04-03 15:50:00,471 ERROR   wandb-upload_1:632 [internal_api.py:upload_file():2077] upload_file response body: 
+2023-04-03 15:50:01,922 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:50:03,946 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:50:05,397 INFO    wandb-upload_3:632 [upload_job.py:push():138] Uploaded file D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\requirements.txt
+2023-04-03 15:50:05,888 INFO    wandb-upload_1:632 [upload_job.py:push():138] Uploaded file D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\files\config.yaml
+2023-04-03 15:50:06,096 INFO    Thread-16 :632 [sender.py:transition_state():587] send defer: 11
+2023-04-03 15:50:06,096 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:50:06,096 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 11
+2023-04-03 15:50:06,097 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:50:06,097 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 11
+2023-04-03 15:50:06,097 INFO    SenderThread:632 [file_pusher.py:join():169] waiting for file pusher
+2023-04-03 15:50:06,097 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 12
+2023-04-03 15:50:06,097 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:50:06,097 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 12
+2023-04-03 15:50:06,097 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:50:06,098 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 12
+2023-04-03 15:50:06,977 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:50:12,024 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:50:17,077 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:50:22,124 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:50:27,189 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:50:30,244 WARNING FileStreamThread:632 [file_stream.py:request_with_retry():670] requests_with_retry encountered retryable exception: ('Connection aborted.', TimeoutError(10060, '由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。', None, 10060, None)). func: <bound method Session.post of <requests.sessions.Session object at 0x000001A354F971C0>>, args: ('https://api.wandb.ai/files/aramiis/PPO_implementation/0v73ucmf/file_stream',), kwargs: {'json': {'complete': False, 'failed': False, 'dropped': 0, 'uploaded': ['conda-environment.yaml', 'output.log', 'wandb-summary.json']}}
+2023-04-03 15:50:32,235 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-03 15:50:33,580 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 13
+2023-04-03 15:50:33,580 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:50:33,580 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 13
+2023-04-03 15:50:33,581 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: status_report
+2023-04-03 15:50:33,581 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:50:33,581 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 13
+2023-04-03 15:50:33,581 INFO    SenderThread:632 [sender.py:transition_state():587] send defer: 14
+2023-04-03 15:50:33,582 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: defer
+2023-04-03 15:50:33,582 DEBUG   SenderThread:632 [sender.py:send():336] send: final
+2023-04-03 15:50:33,582 INFO    HandlerThread:632 [handler.py:handle_request_defer():170] handle defer: 14
+2023-04-03 15:50:33,582 DEBUG   SenderThread:632 [sender.py:send():336] send: footer
+2023-04-03 15:50:33,582 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: defer
+2023-04-03 15:50:33,583 INFO    SenderThread:632 [sender.py:send_request_defer():583] handle sender defer: 14
+2023-04-03 15:50:33,583 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: poll_exit
+2023-04-03 15:50:33,583 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: server_info
+2023-04-03 15:50:33,584 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: get_summary
+2023-04-03 15:50:33,584 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: poll_exit
+2023-04-03 15:50:33,584 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: sampled_history
+2023-04-03 15:50:33,584 DEBUG   SenderThread:632 [sender.py:send_request():363] send_request: server_info
+2023-04-03 15:50:34,227 INFO    MainThread:632 [wandb_run.py:_footer_history_summary_info():3422] rendering history
+2023-04-03 15:50:34,227 INFO    MainThread:632 [wandb_run.py:_footer_history_summary_info():3454] rendering summary
+2023-04-03 15:50:34,227 INFO    MainThread:632 [wandb_run.py:_footer_sync_info():3380] logging synced files
+2023-04-03 15:50:34,228 DEBUG   HandlerThread:632 [handler.py:handle_request():144] handle_request: shutdown
+2023-04-03 15:50:34,228 INFO    HandlerThread:632 [handler.py:finish():842] shutting down handler
+2023-04-03 15:50:34,598 INFO    WriterThread:632 [datastore.py:close():298] close: D:\PycharmProjects\PPOimplementation\wandb\run-20230403_154752-0v73ucmf\run-0v73ucmf.wandb
+2023-04-03 15:50:35,237 INFO    SenderThread:632 [sender.py:finish():1504] shutting down sender
+2023-04-03 15:50:35,237 INFO    SenderThread:632 [file_pusher.py:finish():164] shutting down file pusher
+2023-04-03 15:50:35,238 INFO    SenderThread:632 [file_pusher.py:join():169] waiting for file pusher
