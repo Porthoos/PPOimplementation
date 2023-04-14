@@ -211,17 +211,17 @@ class PPO_net():
             for t in reversed(range(self.batch_size)):
                 # TODO done_ is specially for whether terminated or truncated. as for my env, done_ should be
                 #  terminated, which is always false
-                delta = r[t] + self.gamma * vs_[t] * (1 - done_[t]) - vs[t]
+                delta = r[t] + self.gamma * vs_[t] * (1.0 - done[t]) - vs[t]
                 # TODO whether here should be done or done_? cleanrl use done_, another use done
                 gae = delta + self.gamma * self.lamda * gae * (1.0 - done[t])
                 advantages[t] = gae
 
             returns = advantages + vs
             if self.batch_adv_norm:
-                advantages = (advantages - advantages.mean()) / (1e-8 + advantages.std(self))
+                advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
-            batch_s = s.reshape((-1,) + observation_space)
-            batch_a = a.reshape((-1,) + action_space)
+            batch_s = s.reshape((-1,) + (observation_space,))
+            batch_a = a.reshape((-1,) + (action_space,))
             batch_logprob = a_logprob.reshape(-1)
             batch_adv = advantages.reshape(-1)
             batch_return = returns.reshape(-1)
@@ -245,7 +245,7 @@ class PPO_net():
                 with torch.no_grad():
                     old_approx_kl = (-logratio).mean()
                     approx_kl = ((ratio - 1.0) - logratio).mean()
-                    clipfracs += [((ratio - 1.0).abs() > self.epsilon).float().mean().irem()]
+                    clipfracs += [((ratio - 1.0).abs() > self.epsilon).float().mean().item()]
 
                 minibatch_adv = batch_adv[minibatch_idx]
                 if self.mbatch_adv_norm:
@@ -257,13 +257,13 @@ class PPO_net():
 
                 newvalue = newvalue.view(-1)
                 if self.vloss_clip:
-                    vloss_unclip = (newvalue - batch_v[minibatch_idx]) ** 2
+                    vloss_unclip = (newvalue - batch_return[minibatch_idx]) ** 2
                     v_clip = batch_v[minibatch_idx] + torch.clamp(newvalue - batch_v[minibatch_idx], -self.epsilon, self.epsilon)
-                    vloss_clip = (v_clip - batch_v[minibatch_idx]) ** 2
+                    vloss_clip = (v_clip - batch_return[minibatch_idx]) ** 2
                     vloss_max = torch.max(vloss_unclip, vloss_clip)
-                    v_loss = 0.5 * vloss_max
+                    v_loss = 0.5 * vloss_max.mean()
                 else:
-                    v_loss = ((newvalue - batch_v[minibatch_idx]) ** 2)
+                    v_loss = 0.5 * ((newvalue - batch_return[minibatch_idx]) ** 2).mean()
 
                 entropy_loss = entropy.mean()
                 # TODO use separate optimizer / one optimizer

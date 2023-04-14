@@ -1,0 +1,10 @@
+D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\gymnasium\utils\passive_env_checker.py:195: UserWarning: [33mWARN: The result returned by `env.reset()` was not a tuple of the form `(obs, info)`, where `obs` is a observation and `info` is a dictionary containing additional information. Actual type: `<class 'numpy.ndarray'>`
+  logger.warn(
+D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\gymnasium\utils\passive_env_checker.py:165: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.
+  logger.warn(f"{pre} is not within the observation space.")
+Traceback (most recent call last):
+  File "D:\PycharmProjects\PPOimplementation\PPOmain.py", line 238, in <module>
+    main()
+  File "D:\PycharmProjects\PPOimplementation\PPOmain.py", line 217, in main
+    if total_steps % args.evaulate_freq == 0:
+AttributeError: 'Namespace' object has no attribute 'evaulate_freq'

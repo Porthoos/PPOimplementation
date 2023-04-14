@@ -1,3 +1,4 @@
+import numpy
 from gymnasium import spaces
 # import Paras
 import copy
@@ -22,8 +23,12 @@ from datetime import datetime
 
 #TODO discrete deployment?
 class My_Env(gym.Env):
-    def __init__(self):
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+    def __init__(self, render_mode=None):
         super(My_Env, self).__init__()
+
+        assert render_mode is None or render_mode in self.metadata["render_modes"]
+        self.render_mode = render_mode
 
         self.K = 6    #total users
 
@@ -60,7 +65,7 @@ class My_Env(gym.Env):
 
         # positions
         self.BS_position = [2000, 2000, 5]
-        self.STAR_position = [500, 500, 10]
+        self.STAR_position = [0, 0, 10]
         self.link_position = [0, 0, 0]
         self.type = np.zeros(shape=(self.K, 1))
         self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
@@ -87,7 +92,7 @@ class My_Env(gym.Env):
         self.action_space = spaces.Box(low=0, high=1, shape=(self.action_dim,), dtype=np.float32)
         # BS to user CSI, STAR-RIS element to user CSI, BS to STAR-RIS element CSI
         self.num_states = 2*self.M * self.K + 2*self.N * self.K + 2*self.M*self.N + self.K
-        self.observation_space = spaces.Box(low=0, high=1, shape=(self.num_states,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-10000, high=10000, shape=(self.num_states,), dtype=np.float32)
 
 
     #TODO calculate CSI information
@@ -211,6 +216,8 @@ class My_Env(gym.Env):
         phaseshift_reflection = (action[0:self.N]-0.5) * math.pi * 2
         amplitude_reflection = (action[self.N:2*self.N] + 1) / 2 # why +1/2
         self.theta_R = np.cos(phaseshift_reflection) * amplitude_reflection + np.sin(phaseshift_reflection) * amplitude_reflection * 1j
+        if type(self.theta_R) != numpy.ndarray:
+            self.theta_R = self.theta_R.numpy()
         self.Theta_eye_R = np.eye(self.N) * self.theta_R
 
         # transmission coefficient  >=0 pi/2, <0 -pi/2
@@ -218,6 +225,8 @@ class My_Env(gym.Env):
         phaseshift_transmission += phaseshift_reflection
         amplitude_transmission = np.sqrt(1 - amplitude_reflection**2)
         self.theta_T = np.cos(phaseshift_transmission) * amplitude_transmission + np.sin(phaseshift_transmission) * amplitude_transmission * 1j
+        if type(self.theta_T) != numpy.ndarray:
+            self.theta_T = self.theta_T.numpy()
         self.Theta_eye_T = np.eye(self.N) * self.theta_T
 
         # BS beamforming
@@ -250,22 +259,31 @@ class My_Env(gym.Env):
 
 
     #TODO reset the environmrnt, user position, time, observation state, STAR position???
-    def reset(self, *args, **kwargs):
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
         self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
         self.P_K_list[:, :3] += 200
         self.P_K_list[:, 3:] -= 200
         self.P_K_list[2, :] = 0
 
-        self.FD_B_K = np.random.normal(scale=1, size=(self.M, self.K, self.T)) + np.random.normal(scale=1, size=(self.M, self.K, self.T)) * 1j
-        self.FD_R_K = np.random.normal(scale=1, size=(self.N, self.K, self.T)) + np.random.normal(scale=1, size=(self.N, self.K, self.T)) * 1j
-        self.FD_B_R = np.random.normal(scale=1, size=(self.N, self.M, self.T)) + np.random.normal(scale=1, size=(self.N, self.M, self.T)) * 1j
-        self.FD_B_K = self.fading_scale_BS * self.FD_B_K
-        self.FD_R_K = self.fading_scale_RIS * self.FD_R_K
-        self.FD_B_R = self.fading_scale_RIS * self.FD_B_R
+        # self.FD_B_K = np.random.normal(scale=1, size=(self.M, self.K, self.T)) + np.random.normal(scale=1, size=(self.M, self.K, self.T)) * 1j
+        # self.FD_R_K = np.random.normal(scale=1, size=(self.N, self.K, self.T)) + np.random.normal(scale=1, size=(self.N, self.K, self.T)) * 1j
+        # self.FD_B_R = np.random.normal(scale=1, size=(self.N, self.M, self.T)) + np.random.normal(scale=1, size=(self.N, self.M, self.T)) * 1j
+        # self.FD_B_K = self.fading_scale_BS * self.FD_B_K
+        # self.FD_R_K = self.fading_scale_RIS * self.FD_R_K
+        # self.FD_B_R = self.fading_scale_RIS * self.FD_B_R
 
 
-        self.STAR_position = [500, 500, self.STAR_position[2]]
-        state = self.get_state()
         self.t = 0
+
+        self.STAR_position = [0, 0, self.STAR_position[2]]
+        self.calculate_CSI()
+        state = self.get_state()
         # print(self.P_K_list)
-        return np.array([state]).astype(np.float32)
+        return np.array([state]).astype(np.float32), {}
+
+    def render(self):
+        if self.render_mode == "rgb_array":
+            return self.render_frame()
+
+    def render_frame(self):

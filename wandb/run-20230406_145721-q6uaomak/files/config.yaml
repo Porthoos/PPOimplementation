@@ -1,0 +1,112 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.14.0
+    code_path: code/PPOmain.py
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.8.13
+    start_time: 1680764241.684267
+    t:
+      1:
+      - 1
+      - 2
+      - 3
+      - 55
+      3:
+      - 13
+      - 16
+      - 23
+      - 35
+      4: 3.8.13
+      5: 0.14.0
+      8:
+      - 3
+      - 8
+action_dim:
+  desc: null
+  value: 126
+batch_adv_norm:
+  desc: null
+  value: true
+batch_size:
+  desc: null
+  value: 2048
+entropy_coef:
+  desc: null
+  value: 0.01
+env_id:
+  desc: null
+  value: gym_STAR/My_Env-v1
+epsilon:
+  desc: null
+  value: 0.2
+evaluate_freq:
+  desc: null
+  value: 5000.0
+exp_name:
+  desc: null
+  value: PPOmain
+gamma:
+  desc: null
+  value: 0.99
+hidden_width:
+  desc: null
+  value: 64
+lamda:
+  desc: null
+  value: 0.95
+lr_a:
+  desc: null
+  value: 0.0003
+lr_c:
+  desc: null
+  value: 0.0003
+max_action:
+  desc: null
+  value: 1.0
+max_train_steps:
+  desc: null
+  value: 3000000.0
+mbatch_adv_norm:
+  desc: null
+  value: false
+minibatch_size:
+  desc: null
+  value: 64
+policy_dist:
+  desc: null
+  value: Beta
+seed:
+  desc: null
+  value: 1
+state_dim:
+  desc: null
+  value: 554
+torch_deterministic:
+  desc: null
+  value: true
+track:
+  desc: null
+  value: true
+update_epochs:
+  desc: null
+  value: 10
+use_state_norm:
+  desc: null
+  value: true
+valuef_coef:
+  desc: null
+  value: 0.5
+vloss_clip:
+  desc: null
+  value: true
+wandb_entity:
+  desc: null
+  value: Aramiis
+wandb_project_name:
+  desc: null
+  value: PPO_implementation

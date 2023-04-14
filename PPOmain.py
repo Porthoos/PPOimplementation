@@ -99,6 +99,7 @@ def parse_args():
     parser.add_argument("--batch_adv_norm", type=lambda x: bool(strtobool(x)), default=True)
     parser.add_argument("--mbatch_adv_norm", type=lambda x: bool(strtobool(x)), default=False)
     parser.add_argument("--vloss_clip",type=lambda x: bool(strtobool(x)), default=True)
+    parser.add_argument("--use_state_norm", type=lambda x: bool(strtobool(x)), default=True)
 
     parser.add_argument("--hidden_width", type=int, default=64)
 
@@ -119,7 +120,8 @@ def evaluate_policy(args, env, agent, state_norm):
     evaluate_reward = 0
     steps = 0
     for _ in range(times):
-        s = env.reset()
+        s, _ = env.reset()
+        gamma = 1
         if args.use_state_norm:
             s = state_norm(s, update=False)  # During the evaluating,update=False
         terminated, truncated = False, False
@@ -135,7 +137,8 @@ def evaluate_policy(args, env, agent, state_norm):
             s_, r, truncated, terminated, _ = env.step(action)
             if args.use_state_norm:
                 s_ = state_norm(s_, update=False)
-            episode_reward += r
+            episode_reward += r * gamma
+            gamma *= args.gamma
             s = s_
         evaluate_reward += episode_reward
 
@@ -156,6 +159,8 @@ def main():
     torch.manual_seed(seed)
 
     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+    os.environ["WANDB_API_KEY"] = "1efa41085884f0f2f57e32ca6f6cd45e021f482d"
+    os.environ["WANDB_MODE"] = "offline"
     wandb.init(
         settings=wandb.Settings(start_method="thread"),
         project=args.wandb_project_name,
@@ -183,7 +188,7 @@ def main():
     agent = PPO_net(args, writer)
 
     while total_steps < args.max_train_steps:
-        s = env.reset()
+        s, _ = env.reset(seed=args.seed)
         s = state_norm(s)
         reward_scaling.reset()
 
@@ -214,13 +219,13 @@ def main():
                 agent.update(replaybuffer, total_steps, args.state_dim, args.action_dim)
                 replaybuffer.count = 0
 
-            if total_steps % args.evaulate_freq == 0:
+            if total_steps % args.evaluate_freq == 0:
                 evaluate_num += 1
                 evaluate_reward, episode_length = evaluate_policy(args, env_evaluate, agent, state_norm)
                 writer.add_scalar("eval/episode_return", evaluate_reward, total_steps)
                 writer.add_scalar("eval/episode_length", episode_length, total_steps)
-                writer.add_scalar("eval/env_mean", state_norm.running_ms.mean)
-                writer.add_scalar("eval/env_std", state_norm.running_ms.std)
+                # writer.add_scalars("eval/env_mean", state_norm.running_ms.mean)
+                # writer.add_scalars("eval/env_std", state_norm.running_ms.std)
 
         if total_steps % 1e3 == 0:
             writer.add_scalar("train/episode_return", episode_return, total_steps)

@@ -1,0 +1,718 @@
+diff --git a/.idea/PPOimplementation.iml b/.idea/PPOimplementation.iml
+index d081637..e7def65 100644
+--- a/.idea/PPOimplementation.iml
++++ b/.idea/PPOimplementation.iml
+@@ -5,6 +5,7 @@
+       <sourceFolder url="file://$MODULE_DIR$/../DRL-code-pytorch/gym-STAR" isTestSource="false" />
+     </content>
+     <content url="file://$MODULE_DIR$">
++      <sourceFolder url="file://$MODULE_DIR$/gym-STAR" isTestSource="false" />
+       <excludeFolder url="file://$MODULE_DIR$/venv" />
+     </content>
+     <orderEntry type="jdk" jdkName="Python 3.8 (STAR_DEPLOY)" jdkType="Python SDK" />
+diff --git a/PPOimp.py b/PPOimp.py
+index d3ea4fe..53dfa57 100644
+--- a/PPOimp.py
++++ b/PPOimp.py
+@@ -211,17 +211,17 @@ class PPO_net():
+             for t in reversed(range(self.batch_size)):
+                 # TODO done_ is specially for whether terminated or truncated. as for my env, done_ should be
+                 #  terminated, which is always false
+-                delta = r[t] + self.gamma * vs_[t] * (1 - done_[t]) - vs[t]
++                delta = r[t] + self.gamma * vs_[t] * (1.0 - done[t]) - vs[t]
+                 # TODO whether here should be done or done_? cleanrl use done_, another use done
+                 gae = delta + self.gamma * self.lamda * gae * (1.0 - done[t])
+                 advantages[t] = gae
+ 
+             returns = advantages + vs
+             if self.batch_adv_norm:
+-                advantages = (advantages - advantages.mean()) / (1e-8 + advantages.std(self))
++                advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+ 
+-            batch_s = s.reshape((-1,) + observation_space)
+-            batch_a = a.reshape((-1,) + action_space)
++            batch_s = s.reshape((-1,) + (observation_space,))
++            batch_a = a.reshape((-1,) + (action_space,))
+             batch_logprob = a_logprob.reshape(-1)
+             batch_adv = advantages.reshape(-1)
+             batch_return = returns.reshape(-1)
+@@ -245,7 +245,7 @@ class PPO_net():
+                 with torch.no_grad():
+                     old_approx_kl = (-logratio).mean()
+                     approx_kl = ((ratio - 1.0) - logratio).mean()
+-                    clipfracs += [((ratio - 1.0).abs() > self.epsilon).float().mean().irem()]
++                    clipfracs += [((ratio - 1.0).abs() > self.epsilon).float().mean().item()]
+ 
+                 minibatch_adv = batch_adv[minibatch_idx]
+                 if self.mbatch_adv_norm:
+@@ -257,13 +257,13 @@ class PPO_net():
+ 
+                 newvalue = newvalue.view(-1)
+                 if self.vloss_clip:
+-                    vloss_unclip = (newvalue - batch_v[minibatch_idx]) ** 2
++                    vloss_unclip = (newvalue - batch_return[minibatch_idx]) ** 2
+                     v_clip = batch_v[minibatch_idx] + torch.clamp(newvalue - batch_v[minibatch_idx], -self.epsilon, self.epsilon)
+-                    vloss_clip = (v_clip - batch_v[minibatch_idx]) ** 2
++                    vloss_clip = (v_clip - batch_return[minibatch_idx]) ** 2
+                     vloss_max = torch.max(vloss_unclip, vloss_clip)
+-                    v_loss = 0.5 * vloss_max
++                    v_loss = 0.5 * vloss_max.mean()
+                 else:
+-                    v_loss = ((newvalue - batch_v[minibatch_idx]) ** 2)
++                    v_loss = 0.5 * ((newvalue - batch_return[minibatch_idx]) ** 2).mean()
+ 
+                 entropy_loss = entropy.mean()
+                 # TODO use separate optimizer / one optimizer
+diff --git a/PPOmain.py b/PPOmain.py
+index 0544e3f..b448cd8 100644
+--- a/PPOmain.py
++++ b/PPOmain.py
+@@ -99,6 +99,7 @@ def parse_args():
+     parser.add_argument("--batch_adv_norm", type=lambda x: bool(strtobool(x)), default=True)
+     parser.add_argument("--mbatch_adv_norm", type=lambda x: bool(strtobool(x)), default=False)
+     parser.add_argument("--vloss_clip",type=lambda x: bool(strtobool(x)), default=True)
++    parser.add_argument("--use_state_norm", type=lambda x: bool(strtobool(x)), default=True)
+ 
+     parser.add_argument("--hidden_width", type=int, default=64)
+ 
+@@ -119,7 +120,8 @@ def evaluate_policy(args, env, agent, state_norm):
+     evaluate_reward = 0
+     steps = 0
+     for _ in range(times):
+-        s = env.reset()
++        s, _ = env.reset()
++        gamma = 1
+         if args.use_state_norm:
+             s = state_norm(s, update=False)  # During the evaluating,update=False
+         terminated, truncated = False, False
+@@ -135,7 +137,8 @@ def evaluate_policy(args, env, agent, state_norm):
+             s_, r, truncated, terminated, _ = env.step(action)
+             if args.use_state_norm:
+                 s_ = state_norm(s_, update=False)
+-            episode_reward += r
++            episode_reward += r * gamma
++            gamma *= args.gamma
+             s = s_
+         evaluate_reward += episode_reward
+ 
+@@ -156,6 +159,8 @@ def main():
+     torch.manual_seed(seed)
+ 
+     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
++    os.environ["WANDB_API_KEY"] = "1efa41085884f0f2f57e32ca6f6cd45e021f482d"
++    os.environ["WANDB_MODE"] = "offline"
+     wandb.init(
+         settings=wandb.Settings(start_method="thread"),
+         project=args.wandb_project_name,
+@@ -183,7 +188,7 @@ def main():
+     agent = PPO_net(args, writer)
+ 
+     while total_steps < args.max_train_steps:
+-        s = env.reset()
++        s, _ = env.reset(seed=args.seed)
+         s = state_norm(s)
+         reward_scaling.reset()
+ 
+@@ -214,13 +219,13 @@ def main():
+                 agent.update(replaybuffer, total_steps, args.state_dim, args.action_dim)
+                 replaybuffer.count = 0
+ 
+-            if total_steps % args.evaulate_freq == 0:
++            if total_steps % args.evaluate_freq == 0:
+                 evaluate_num += 1
+                 evaluate_reward, episode_length = evaluate_policy(args, env_evaluate, agent, state_norm)
+                 writer.add_scalar("eval/episode_return", evaluate_reward, total_steps)
+                 writer.add_scalar("eval/episode_length", episode_length, total_steps)
+-                writer.add_scalar("eval/env_mean", state_norm.running_ms.mean)
+-                writer.add_scalar("eval/env_std", state_norm.running_ms.std)
++                # writer.add_scalars("eval/env_mean", state_norm.running_ms.mean)
++                # writer.add_scalars("eval/env_std", state_norm.running_ms.std)
+ 
+         if total_steps % 1e3 == 0:
+             writer.add_scalar("train/episode_return", episode_return, total_steps)
+diff --git a/gym-STAR/gym_STAR/env/My_Env_v1.py b/gym-STAR/gym_STAR/env/My_Env_v1.py
+index 882b78e..29ee48f 100644
+--- a/gym-STAR/gym_STAR/env/My_Env_v1.py
++++ b/gym-STAR/gym_STAR/env/My_Env_v1.py
+@@ -1,3 +1,4 @@
++import numpy
+ from gymnasium import spaces
+ # import Paras
+ import copy
+@@ -60,7 +61,7 @@ class My_Env(gym.Env):
+ 
+         # positions
+         self.BS_position = [2000, 2000, 5]
+-        self.STAR_position = [500, 500, 10]
++        self.STAR_position = [0, 0, 10]
+         self.link_position = [0, 0, 0]
+         self.type = np.zeros(shape=(self.K, 1))
+         self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
+@@ -87,7 +88,7 @@ class My_Env(gym.Env):
+         self.action_space = spaces.Box(low=0, high=1, shape=(self.action_dim,), dtype=np.float32)
+         # BS to user CSI, STAR-RIS element to user CSI, BS to STAR-RIS element CSI
+         self.num_states = 2*self.M * self.K + 2*self.N * self.K + 2*self.M*self.N + self.K
+-        self.observation_space = spaces.Box(low=0, high=1, shape=(self.num_states,), dtype=np.float32)
++        self.observation_space = spaces.Box(low=-1, high=1, shape=(self.num_states,), dtype=np.float32)
+ 
+ 
+     #TODO calculate CSI information
+@@ -211,6 +212,8 @@ class My_Env(gym.Env):
+         phaseshift_reflection = (action[0:self.N]-0.5) * math.pi * 2
+         amplitude_reflection = (action[self.N:2*self.N] + 1) / 2 # why +1/2
+         self.theta_R = np.cos(phaseshift_reflection) * amplitude_reflection + np.sin(phaseshift_reflection) * amplitude_reflection * 1j
++        if type(self.theta_R) != numpy.ndarray:
++            self.theta_R = self.theta_R.numpy()
+         self.Theta_eye_R = np.eye(self.N) * self.theta_R
+ 
+         # transmission coefficient  >=0 pi/2, <0 -pi/2
+@@ -218,6 +221,8 @@ class My_Env(gym.Env):
+         phaseshift_transmission += phaseshift_reflection
+         amplitude_transmission = np.sqrt(1 - amplitude_reflection**2)
+         self.theta_T = np.cos(phaseshift_transmission) * amplitude_transmission + np.sin(phaseshift_transmission) * amplitude_transmission * 1j
++        if type(self.theta_T) != numpy.ndarray:
++            self.theta_T = self.theta_T.numpy()
+         self.Theta_eye_T = np.eye(self.N) * self.theta_T
+ 
+         # BS beamforming
+@@ -250,22 +255,23 @@ class My_Env(gym.Env):
+ 
+ 
+     #TODO reset the environmrnt, user position, time, observation state, STAR position???
+-    def reset(self, *args, **kwargs):
++    def reset(self, seed=None, options=None):
++        super().reset(seed=seed)
+         self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
+         self.P_K_list[:, :3] += 200
+         self.P_K_list[:, 3:] -= 200
+         self.P_K_list[2, :] = 0
+ 
+-        self.FD_B_K = np.random.normal(scale=1, size=(self.M, self.K, self.T)) + np.random.normal(scale=1, size=(self.M, self.K, self.T)) * 1j
+-        self.FD_R_K = np.random.normal(scale=1, size=(self.N, self.K, self.T)) + np.random.normal(scale=1, size=(self.N, self.K, self.T)) * 1j
+-        self.FD_B_R = np.random.normal(scale=1, size=(self.N, self.M, self.T)) + np.random.normal(scale=1, size=(self.N, self.M, self.T)) * 1j
+-        self.FD_B_K = self.fading_scale_BS * self.FD_B_K
+-        self.FD_R_K = self.fading_scale_RIS * self.FD_R_K
+-        self.FD_B_R = self.fading_scale_RIS * self.FD_B_R
++        # self.FD_B_K = np.random.normal(scale=1, size=(self.M, self.K, self.T)) + np.random.normal(scale=1, size=(self.M, self.K, self.T)) * 1j
++        # self.FD_R_K = np.random.normal(scale=1, size=(self.N, self.K, self.T)) + np.random.normal(scale=1, size=(self.N, self.K, self.T)) * 1j
++        # self.FD_B_R = np.random.normal(scale=1, size=(self.N, self.M, self.T)) + np.random.normal(scale=1, size=(self.N, self.M, self.T)) * 1j
++        # self.FD_B_K = self.fading_scale_BS * self.FD_B_K
++        # self.FD_R_K = self.fading_scale_RIS * self.FD_R_K
++        # self.FD_B_R = self.fading_scale_RIS * self.FD_B_R
+ 
+ 
+-        self.STAR_position = [500, 500, self.STAR_position[2]]
++        self.STAR_position = [0, 0, self.STAR_position[2]]
+         state = self.get_state()
+         self.t = 0
+         # print(self.P_K_list)
+-        return np.array([state]).astype(np.float32)
+\ No newline at end of file
++        return np.array([state]).astype(np.float32), {}
+\ No newline at end of file
+diff --git a/ppo_continuous_action.py b/ppo_continuous_action.py
+index fda0205..4201b91 100644
+--- a/ppo_continuous_action.py
++++ b/ppo_continuous_action.py
+@@ -12,6 +12,7 @@ import torch.nn as nn
+ import torch.optim as optim
+ from torch.distributions.normal import Normal
+ from torch.utils.tensorboard import SummaryWriter
++import gym_STAR
+ 
+ 
+ def parse_args():
+@@ -35,7 +36,7 @@ def parse_args():
+         help="whether to capture videos of the agent performances (check out `videos` folder)")
+ 
+     # Algorithm specific arguments
+-    parser.add_argument("--env-id", type=str, default="HalfCheetah-v4",
++    parser.add_argument("--env-id", type=str, default="gym_STAR/My_Env-v1",
+         help="the id of the environment")
+     parser.add_argument("--total-timesteps", type=int, default=1000000,
+         help="total timesteps of the experiments")
+@@ -140,7 +141,8 @@ if __name__ == "__main__":
+     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+     if args.track:
+         import wandb
+-
++        os.environ["WANDB_API_KEY"] = "1efa41085884f0f2f57e32ca6f6cd45e021f482d"
++        os.environ["WANDB_MODE"] = "offline"
+         wandb.init(
+             project=args.wandb_project_name,
+             entity=args.wandb_entity,
+diff --git a/runs/gym_STAR/My_Env-v1__PPOmain__1__1680508062/events.out.tfevents.1680508089.DESKTOP-RPOI2A1.2896.0 b/runs/gym_STAR/My_Env-v1__PPOmain__1__1680508062/events.out.tfevents.1680508089.DESKTOP-RPOI2A1.2896.0
+deleted file mode 100644
+index 7b029e6..0000000
+Binary files a/runs/gym_STAR/My_Env-v1__PPOmain__1__1680508062/events.out.tfevents.1680508089.DESKTOP-RPOI2A1.2896.0 and /dev/null differ
+diff --git a/wandb/debug-cli.JinLab.log b/wandb/debug-cli.JinLab.log
+index e69de29..a8cb8bd 100644
+--- a/wandb/debug-cli.JinLab.log
++++ b/wandb/debug-cli.JinLab.log
+@@ -0,0 +1,466 @@
++2023-04-04 11:50:56 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 700, in urlopen
++    self._prepare_proxy(conn)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 996, in _prepare_proxy
++    conn.connect()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connection.py", line 364, in connect
++    self.sock = conn = self._connect_tls_proxy(hostname, conn)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connection.py", line 499, in _connect_tls_proxy
++    socket = ssl_wrap_socket(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\ssl_.py", line 453, in ssl_wrap_socket
++    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\ssl_.py", line 495, in _ssl_wrap_socket_impl
++    return ssl_context.wrap_socket(sock)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 500, in wrap_socket
++    return self.sslsocket_class._create(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1040, in _create
++    self.do_handshake()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1309, in do_handshake
++    self._sslobj.do_handshake()
++ssl.SSLEOFError: EOF occurred in violation of protocol (_ssl.c:1131)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 592, in increment
++    raise MaxRetryError(_pool, url, error or ResponseError(cause))
++urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)')))
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 563, in send
++    raise SSLError(e, request=request)
++requests.exceptions.SSLError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)')))
++2023-04-04 19:30:52 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 19:30:52 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 19:30:52 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:08:57 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:08:57 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:08:57 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:15:50 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:15:50 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:15:50 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:24:03 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:24:03 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:24:03 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:31:30 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:31:30 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:31:30 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-05 15:35:45 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-05 15:36:33 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
++    six.raise_from(e, None)
++  File "<string>", line 3, in raise_from
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
++    httplib_response = conn.getresponse()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 1348, in getresponse
++    response.begin()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 316, in begin
++    version, status, reason = self._read_status()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 277, in _read_status
++    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\socket.py", line 669, in readinto
++    return self._sock.recv_into(b)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1241, in recv_into
++    return self.read(nbytes, buffer)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1099, in read
++    return self._sslobj.read(len, buffer)
++socket.timeout: The read operation timed out
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 550, in increment
++    raise six.reraise(type(error), error, _stacktrace)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
++    raise value
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
++    httplib_response = self._make_request(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
++    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
++    raise ReadTimeoutError(
++urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 578, in send
++    raise ReadTimeout(e, request=request)
++requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++2023-04-05 15:53:33 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-05 15:54:08 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
++    six.raise_from(e, None)
++  File "<string>", line 3, in raise_from
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
++    httplib_response = conn.getresponse()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 1348, in getresponse
++    response.begin()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 316, in begin
++    version, status, reason = self._read_status()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 277, in _read_status
++    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\socket.py", line 669, in readinto
++    return self._sock.recv_into(b)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1241, in recv_into
++    return self.read(nbytes, buffer)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1099, in read
++    return self._sslobj.read(len, buffer)
++socket.timeout: The read operation timed out
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 550, in increment
++    raise six.reraise(type(error), error, _stacktrace)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
++    raise value
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
++    httplib_response = self._make_request(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
++    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
++    raise ReadTimeoutError(
++urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 578, in send
++    raise ReadTimeout(e, request=request)
++requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++2023-04-05 15:55:40 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-05 15:55:43 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 700, in urlopen
++    self._prepare_proxy(conn)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 996, in _prepare_proxy
++    conn.connect()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connection.py", line 364, in connect
++    self.sock = conn = self._connect_tls_proxy(hostname, conn)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connection.py", line 499, in _connect_tls_proxy
++    socket = ssl_wrap_socket(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\ssl_.py", line 453, in ssl_wrap_socket
++    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\ssl_.py", line 495, in _ssl_wrap_socket_impl
++    return ssl_context.wrap_socket(sock)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 500, in wrap_socket
++    return self.sslsocket_class._create(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1040, in _create
++    self.do_handshake()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1309, in do_handshake
++    self._sslobj.do_handshake()
++ssl.SSLEOFError: EOF occurred in violation of protocol (_ssl.c:1131)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 592, in increment
++    raise MaxRetryError(_pool, url, error or ResponseError(cause))
++urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)')))
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 563, in send
++    raise SSLError(e, request=request)
++requests.exceptions.SSLError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)')))
++2023-04-05 16:05:46 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-05 16:06:20 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
++    six.raise_from(e, None)
++  File "<string>", line 3, in raise_from
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
++    httplib_response = conn.getresponse()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 1348, in getresponse
++    response.begin()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 316, in begin
++    version, status, reason = self._read_status()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 277, in _read_status
++    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\socket.py", line 669, in readinto
++    return self._sock.recv_into(b)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1241, in recv_into
++    return self.read(nbytes, buffer)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1099, in read
++    return self._sslobj.read(len, buffer)
++socket.timeout: The read operation timed out
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 550, in increment
++    raise six.reraise(type(error), error, _stacktrace)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
++    raise value
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
++    httplib_response = self._make_request(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
++    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
++    raise ReadTimeoutError(
++urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 578, in send
++    raise ReadTimeout(e, request=request)
++requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++2023-04-06 10:30:08 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\run-9enh1si8.wandb
++2023-04-06 10:30:09 INFO watching files in: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files
++2023-04-06 10:30:09 INFO run started: 9enh1si8 with start time 1680682533.77877
++2023-04-06 10:30:09 INFO saving file wandb-metadata.json with policy now
++2023-04-06 10:30:09 INFO saving file code\ppo_continuous_action.py with policy now
++2023-04-06 10:30:09 INFO saving file diff.patch with policy now
++2023-04-06 10:30:11 INFO saving file wandb-summary.json with policy end
++2023-04-06 10:30:11 INFO handling exit code: 0
++2023-04-06 10:30:11 INFO handling runtime: 3829
++2023-04-06 10:30:11 INFO saving file wandb-summary.json with policy end
++2023-04-06 10:30:11 INFO send defer
++2023-04-06 10:30:11 INFO handle sender defer: 0
++2023-04-06 10:30:11 INFO send defer: 1
++2023-04-06 10:30:11 INFO handle sender defer: 1
++2023-04-06 10:30:11 INFO send defer: 2
++2023-04-06 10:30:11 INFO handle sender defer: 2
++2023-04-06 10:30:11 INFO send defer: 3
++2023-04-06 10:30:11 INFO handle sender defer: 3
++2023-04-06 10:30:11 INFO send defer: 4
++2023-04-06 10:30:11 INFO handle sender defer: 4
++2023-04-06 10:30:11 INFO send defer: 5
++2023-04-06 10:30:11 INFO handle sender defer: 5
++2023-04-06 10:30:11 INFO send defer: 6
++2023-04-06 10:30:11 INFO handle sender defer: 6
++2023-04-06 10:30:11 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\wandb-summary.json
++2023-04-06 10:30:11 INFO file/dir created: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\output.log
++2023-04-06 10:30:11 INFO Skipped uploading C:\Users\JinLab\AppData\Local\Temp\tmpwoi0jvw2wandb\3a64y4bm-code/ppo_continuous_action.py
++2023-04-06 10:30:12 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\wandb-summary.json
++2023-04-06 10:30:12 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\output.log
++2023-04-06 10:30:13 INFO Uploaded file C:\Users\JinLab\AppData\Local\Temp\tmpwoi0jvw2wandb\harbmy3k-wandb-metadata.json
++2023-04-06 10:30:13 INFO send defer: 7
++2023-04-06 10:30:13 INFO handle sender defer: 7
++2023-04-06 10:30:14 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\config.yaml
++2023-04-06 10:30:16 INFO send defer: 8
++2023-04-06 10:30:16 INFO handle sender defer: 8
++2023-04-06 10:30:16 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\output.log
++2023-04-06 10:30:16 INFO send defer: 9
++2023-04-06 10:30:17 INFO Uploaded file C:\Users\JinLab\AppData\Local\Temp\tmpwoi0jvw2wandb\dg9q4d6r-diff.patch
++2023-04-06 10:30:19 INFO Uploaded file C:\Users\JinLab\AppData\Local\wandb\wandb\artifacts\staging\tmpb___2vbr
++2023-04-06 10:30:20 INFO Uploaded file C:\Users\JinLab\AppData\Local\wandb\wandb\artifacts\staging\tmpyex2ehy5
++2023-04-06 10:30:20 INFO Uploaded file C:\Users\JinLab\AppData\Local\wandb\wandb\artifacts\staging\tmpa6ixhzgm
++2023-04-06 10:30:26 INFO sent artifact job-https___github.com_Porthoos_PPOimplementation.git_ppo_continuous_action.py - {'id': 'QXJ0aWZhY3Q6NDE0OTUxMTc2', 'digest': 'e133fa450795f72b95099b92dae99711', 'state': 'PENDING', 'aliases': [], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjYwNzYzOTMz', 'latestArtifact': None}, 'version': 'latest'}
++2023-04-06 10:30:26 INFO handle sender defer: 9
++2023-04-06 10:30:26 INFO shutting down directory watcher
++2023-04-06 10:30:26 INFO scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files
++2023-04-06 10:30:26 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\conda-environment.yaml conda-environment.yaml
++2023-04-06 10:30:26 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\config.yaml config.yaml
++2023-04-06 10:30:26 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\diff.patch diff.patch
++2023-04-06 10:30:26 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\output.log output.log
++2023-04-06 10:30:26 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\requirements.txt requirements.txt
++2023-04-06 10:30:26 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\wandb-metadata.json wandb-metadata.json
++2023-04-06 10:30:26 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\wandb-summary.json wandb-summary.json
++2023-04-06 10:30:26 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\code\ppo_continuous_action.py code\ppo_continuous_action.py
++2023-04-06 10:30:26 INFO send defer: 10
++2023-04-06 10:30:26 INFO handle sender defer: 10
++2023-04-06 10:30:26 INFO shutting down file pusher
++2023-04-06 10:30:26 INFO shutting down sender
++2023-04-06 10:30:26 INFO shutting down file pusher
++2023-04-06 10:30:26 INFO waiting for file pusher
++2023-04-06 10:30:27 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\requirements.txt
++2023-04-06 10:30:27 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\config.yaml
++2023-04-06 10:30:28 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\conda-environment.yaml
++2023-04-06 10:30:28 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\wandb-summary.json
++2023-04-06 10:30:28 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230405_161533-9enh1si8\files\output.log
++2023-04-06 10:30:28 INFO send defer: 11
++2023-04-06 10:31:02 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-06 10:31:03 INFO watching files in: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files
++2023-04-06 10:31:03 INFO run started: xcytp9ss with start time 1680611423.252972
++2023-04-06 10:31:03 INFO saving file wandb-metadata.json with policy now
++2023-04-06 10:31:03 INFO saving file code\PPOmain.py with policy now
++2023-04-06 10:31:03 INFO saving file diff.patch with policy now
++2023-04-06 10:31:03 INFO saving file wandb-summary.json with policy end
++2023-04-06 10:31:03 INFO handling exit code: 1
++2023-04-06 10:31:03 INFO handling runtime: 2816
++2023-04-06 10:31:03 INFO saving file wandb-summary.json with policy end
++2023-04-06 10:31:03 INFO send defer
++2023-04-06 10:31:03 INFO handle sender defer: 0
++2023-04-06 10:31:03 INFO send defer: 1
++2023-04-06 10:31:03 INFO handle sender defer: 1
++2023-04-06 10:31:03 INFO send defer: 2
++2023-04-06 10:31:03 INFO handle sender defer: 2
++2023-04-06 10:31:03 INFO send defer: 3
++2023-04-06 10:31:03 INFO handle sender defer: 3
++2023-04-06 10:31:03 INFO send defer: 4
++2023-04-06 10:31:03 INFO handle sender defer: 4
++2023-04-06 10:31:03 INFO send defer: 5
++2023-04-06 10:31:03 INFO handle sender defer: 5
++2023-04-06 10:31:03 INFO send defer: 6
++2023-04-06 10:31:03 INFO handle sender defer: 6
++2023-04-06 10:31:04 INFO Skipped uploading C:\Users\JinLab\AppData\Local\Temp\tmpc7nsmnt0wandb\n3e9v8gz-code/PPOmain.py
++2023-04-06 10:31:04 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\wandb-summary.json
++2023-04-06 10:31:04 INFO file/dir created: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\output.log
++2023-04-06 10:31:05 INFO Uploaded file C:\Users\JinLab\AppData\Local\Temp\tmpc7nsmnt0wandb\b6vok2vk-wandb-metadata.json
++2023-04-06 10:31:05 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\output.log
++2023-04-06 10:31:07 INFO Uploaded file C:\Users\JinLab\AppData\Local\Temp\tmpc7nsmnt0wandb\ig7xnuo8-diff.patch
++2023-04-06 10:31:26 INFO send defer: 7
++2023-04-06 10:31:26 INFO handle sender defer: 7
++2023-04-06 10:31:26 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\config.yaml
++2023-04-06 10:31:27 INFO send defer: 8
++2023-04-06 10:31:27 INFO handle sender defer: 8
++2023-04-06 10:31:27 INFO send defer: 9
++2023-04-06 10:31:27 INFO file/dir modified: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\output.log
++2023-04-06 10:31:32 INFO Skipped uploading C:\Users\JinLab\AppData\Local\wandb\wandb\artifacts\staging\tmps9epzmlo
++2023-04-06 10:31:32 INFO Uploaded file C:\Users\JinLab\AppData\Local\wandb\wandb\artifacts\staging\tmp1e_uczkp
++2023-04-06 10:31:33 INFO Uploaded file C:\Users\JinLab\AppData\Local\wandb\wandb\artifacts\staging\tmplx63xeez
++2023-04-06 10:31:37 INFO sent artifact job-https___github.com_Porthoos_PPOimplementation.git_PPOmain.py - {'id': 'QXJ0aWZhY3Q6NDE0OTUxODk2', 'digest': '637ccaec546d34bd20d79416c7a96c55', 'state': 'PENDING', 'aliases': [], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjYwMTIzOTQ3', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6NDEyNjg4NTI1', 'versionIndex': 1}}, 'version': 'latest'}
++2023-04-06 10:31:37 INFO handle sender defer: 9
++2023-04-06 10:31:37 INFO shutting down directory watcher
++2023-04-06 10:31:37 INFO scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files
++2023-04-06 10:31:37 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\conda-environment.yaml conda-environment.yaml
++2023-04-06 10:31:37 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\config.yaml config.yaml
++2023-04-06 10:31:37 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\diff.patch diff.patch
++2023-04-06 10:31:37 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\output.log output.log
++2023-04-06 10:31:37 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\requirements.txt requirements.txt
++2023-04-06 10:31:38 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\wandb-metadata.json wandb-metadata.json
++2023-04-06 10:31:38 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\wandb-summary.json wandb-summary.json
++2023-04-06 10:31:38 INFO scan save: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\code\PPOmain.py code\PPOmain.py
++2023-04-06 10:31:38 INFO send defer: 10
++2023-04-06 10:31:38 INFO handle sender defer: 10
++2023-04-06 10:31:38 INFO shutting down file pusher
++2023-04-06 10:31:38 INFO shutting down sender
++2023-04-06 10:31:38 INFO shutting down file pusher
++2023-04-06 10:31:38 INFO waiting for file pusher
++2023-04-06 10:31:39 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\config.yaml
++2023-04-06 10:31:40 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\requirements.txt
++2023-04-06 10:31:40 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\output.log
++2023-04-06 10:31:40 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\wandb-summary.json
++2023-04-06 10:31:43 INFO Uploaded file D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\files\conda-environment.yaml
++2023-04-06 10:31:43 INFO send defer: 11
++2023-04-06 15:23:12 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 15:23:12 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 15:23:12 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 19:08:46 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 19:08:46 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 19:08:46 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 20:24:33 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 20:24:33 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 20:24:33 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 20:33:24 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 20:33:24 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-06 20:33:24 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/

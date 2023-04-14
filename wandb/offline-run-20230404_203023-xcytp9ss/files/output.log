@@ -1,0 +1,63 @@
+D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\gymnasium\utils\passive_env_checker.py:165: UserWarning: [33mWARN: The obs returned by the `reset()` method is not within the observation space.
+  logger.warn(f"{pre} is not within the observation space.")
+D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\gymnasium\utils\passive_env_checker.py:165: UserWarning: [33mWARN: The obs returned by the `step()` method is not within the observation space.
+  logger.warn(f"{pre} is not within the observation space.")
+Traceback (most recent call last):
+  File "D:\PycharmProjects\PPOimplementation\PPOmain.py", line 241, in <module>
+    main()
+  File "D:\PycharmProjects\PPOimplementation\PPOmain.py", line 217, in main
+    agent.update(replaybuffer, total_steps, args.state_dim, args.action_dim)
+  File "D:\PycharmProjects\PPOimplementation\PPOimp.py", line 238, in update
+    dist = self.actor.get_dist(batch_s[minibatch_idx])
+  File "D:\PycharmProjects\PPOimplementation\PPOimp.py", line 49, in get_dist
+    dist = Beta(alpha, beta)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\torch\distributions\beta.py", line 36, in __init__
+    self._dirichlet = Dirichlet(concentration1_concentration0, validate_args=validate_args)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\torch\distributions\dirichlet.py", line 52, in __init__
+    super(Dirichlet, self).__init__(batch_shape, event_shape, validate_args=validate_args)
+  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\torch\distributions\distribution.py", line 55, in __init__
+    raise ValueError(
+ValueError: Expected parameter concentration (Tensor of shape (64, 126, 2)) of distribution Dirichlet(concentration: torch.Size([64, 126, 2])) to satisfy the constraint IndependentConstraint(GreaterThan(lower_bound=0.0), 1), but found invalid values:
+tensor([[[nan, nan],
+         [nan, nan],
+         [nan, nan],
+         ...,
+         [nan, nan],
+         [nan, nan],
+         [nan, nan]],
+        [[nan, nan],
+         [nan, nan],
+         [nan, nan],
+         ...,
+         [nan, nan],
+         [nan, nan],
+         [nan, nan]],
+        [[nan, nan],
+         [nan, nan],
+         [nan, nan],
+         ...,
+         [nan, nan],
+         [nan, nan],
+         [nan, nan]],
+        ...,
+        [[nan, nan],
+         [nan, nan],
+         [nan, nan],
+         ...,
+         [nan, nan],
+         [nan, nan],
+         [nan, nan]],
+        [[nan, nan],
+         [nan, nan],
+         [nan, nan],
+         ...,
+         [nan, nan],
+         [nan, nan],
+         [nan, nan]],
+        [[nan, nan],
+         [nan, nan],
+         [nan, nan],
+         ...,
+         [nan, nan],
+         [nan, nan],
+         [nan, nan]]], grad_fn=<StackBackward0>)

@@ -1,0 +1,42 @@
+{
+    "os": "Windows-10-10.0.19044-SP0",
+    "python": "3.8.13",
+    "heartbeatAt": "2023-04-07T12:47:58.070304",
+    "startedAt": "2023-04-07T12:47:57.950623",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "PPOmain.py",
+    "codePath": "PPOmain.py",
+    "git": {
+        "remote": "https://github.com/Porthoos/PPOimplementation.git",
+        "commit": "f7da1d2e972f23e8cc5a228cce357bd0af524f60"
+    },
+    "email": "aramiis@163.com",
+    "root": "D:/PycharmProjects/PPOimplementation",
+    "host": "DESKTOP-RPOI2A1",
+    "username": "JinLab",
+    "executable": "D:\\anaconda3\\envs\\STAR_DEPLOY\\python.exe",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 3408.0,
+        "min": 0.0,
+        "max": 3408.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3408.0,
+            "min": 0.0,
+            "max": 3408.0
+        }
+    ],
+    "disk": {
+        "total": 931.5097618103027,
+        "used": 37.431846618652344
+    },
+    "memory": {
+        "total": 15.909587860107422
+    }
+}

@@ -1,0 +1,482 @@
+diff --git a/PPOimp.py b/PPOimp.py
+index d3ea4fe..e283a9c 100644
+--- a/PPOimp.py
++++ b/PPOimp.py
+@@ -218,10 +218,10 @@ class PPO_net():
+ 
+             returns = advantages + vs
+             if self.batch_adv_norm:
+-                advantages = (advantages - advantages.mean()) / (1e-8 + advantages.std(self))
++                advantages = (advantages - advantages.mean()) / (1e-8 + advantages.std())
+ 
+-            batch_s = s.reshape((-1,) + observation_space)
+-            batch_a = a.reshape((-1,) + action_space)
++            batch_s = s.reshape((-1,) + (observation_space,))
++            batch_a = a.reshape((-1,) + (action_space,))
+             batch_logprob = a_logprob.reshape(-1)
+             batch_adv = advantages.reshape(-1)
+             batch_return = returns.reshape(-1)
+@@ -245,7 +245,7 @@ class PPO_net():
+                 with torch.no_grad():
+                     old_approx_kl = (-logratio).mean()
+                     approx_kl = ((ratio - 1.0) - logratio).mean()
+-                    clipfracs += [((ratio - 1.0).abs() > self.epsilon).float().mean().irem()]
++                    clipfracs += [((ratio - 1.0).abs() > self.epsilon).float().mean().item()]
+ 
+                 minibatch_adv = batch_adv[minibatch_idx]
+                 if self.mbatch_adv_norm:
+@@ -261,9 +261,9 @@ class PPO_net():
+                     v_clip = batch_v[minibatch_idx] + torch.clamp(newvalue - batch_v[minibatch_idx], -self.epsilon, self.epsilon)
+                     vloss_clip = (v_clip - batch_v[minibatch_idx]) ** 2
+                     vloss_max = torch.max(vloss_unclip, vloss_clip)
+-                    v_loss = 0.5 * vloss_max
++                    v_loss = 0.5 * vloss_max.mean()
+                 else:
+-                    v_loss = ((newvalue - batch_v[minibatch_idx]) ** 2)
++                    v_loss = ((newvalue - batch_v[minibatch_idx]) ** 2).mean()
+ 
+                 entropy_loss = entropy.mean()
+                 # TODO use separate optimizer / one optimizer
+diff --git a/PPOmain.py b/PPOmain.py
+index 0544e3f..1a9769f 100644
+--- a/PPOmain.py
++++ b/PPOmain.py
+@@ -99,6 +99,7 @@ def parse_args():
+     parser.add_argument("--batch_adv_norm", type=lambda x: bool(strtobool(x)), default=True)
+     parser.add_argument("--mbatch_adv_norm", type=lambda x: bool(strtobool(x)), default=False)
+     parser.add_argument("--vloss_clip",type=lambda x: bool(strtobool(x)), default=True)
++    parser.add_argument("--use_state_norm", type=lambda x: bool(strtobool(x)), default=True)
+ 
+     parser.add_argument("--hidden_width", type=int, default=64)
+ 
+@@ -119,7 +120,7 @@ def evaluate_policy(args, env, agent, state_norm):
+     evaluate_reward = 0
+     steps = 0
+     for _ in range(times):
+-        s = env.reset()
++        s, _ = env.reset()
+         if args.use_state_norm:
+             s = state_norm(s, update=False)  # During the evaluating,update=False
+         terminated, truncated = False, False
+@@ -156,6 +157,8 @@ def main():
+     torch.manual_seed(seed)
+ 
+     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
++    os.environ["WANDB_API_KEY"] = "1efa41085884f0f2f57e32ca6f6cd45e021f482d"
++    os.environ["WANDB_MODE"] = "offline"
+     wandb.init(
+         settings=wandb.Settings(start_method="thread"),
+         project=args.wandb_project_name,
+@@ -183,7 +186,7 @@ def main():
+     agent = PPO_net(args, writer)
+ 
+     while total_steps < args.max_train_steps:
+-        s = env.reset()
++        s, _ = env.reset(seed=args.seed)
+         s = state_norm(s)
+         reward_scaling.reset()
+ 
+@@ -214,13 +217,13 @@ def main():
+                 agent.update(replaybuffer, total_steps, args.state_dim, args.action_dim)
+                 replaybuffer.count = 0
+ 
+-            if total_steps % args.evaulate_freq == 0:
++            if total_steps % args.evaluate_freq == 0:
+                 evaluate_num += 1
+                 evaluate_reward, episode_length = evaluate_policy(args, env_evaluate, agent, state_norm)
+                 writer.add_scalar("eval/episode_return", evaluate_reward, total_steps)
+                 writer.add_scalar("eval/episode_length", episode_length, total_steps)
+-                writer.add_scalar("eval/env_mean", state_norm.running_ms.mean)
+-                writer.add_scalar("eval/env_std", state_norm.running_ms.std)
++                # writer.add_scalars("eval/env_mean", state_norm.running_ms.mean)
++                # writer.add_scalars("eval/env_std", state_norm.running_ms.std)
+ 
+         if total_steps % 1e3 == 0:
+             writer.add_scalar("train/episode_return", episode_return, total_steps)
+diff --git a/gym-STAR/gym_STAR/env/My_Env_v1.py b/gym-STAR/gym_STAR/env/My_Env_v1.py
+index 882b78e..9e4067c 100644
+--- a/gym-STAR/gym_STAR/env/My_Env_v1.py
++++ b/gym-STAR/gym_STAR/env/My_Env_v1.py
+@@ -250,7 +250,8 @@ class My_Env(gym.Env):
+ 
+ 
+     #TODO reset the environmrnt, user position, time, observation state, STAR position???
+-    def reset(self, *args, **kwargs):
++    def reset(self, seed=None, options=None):
++        super().reset(seed=seed)
+         self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
+         self.P_K_list[:, :3] += 200
+         self.P_K_list[:, 3:] -= 200
+@@ -268,4 +269,4 @@ class My_Env(gym.Env):
+         state = self.get_state()
+         self.t = 0
+         # print(self.P_K_list)
+-        return np.array([state]).astype(np.float32)
+\ No newline at end of file
++        return np.array([state]).astype(np.float32), {}
+\ No newline at end of file
+diff --git a/ppo_continuous_action.py b/ppo_continuous_action.py
+index fda0205..4201b91 100644
+--- a/ppo_continuous_action.py
++++ b/ppo_continuous_action.py
+@@ -12,6 +12,7 @@ import torch.nn as nn
+ import torch.optim as optim
+ from torch.distributions.normal import Normal
+ from torch.utils.tensorboard import SummaryWriter
++import gym_STAR
+ 
+ 
+ def parse_args():
+@@ -35,7 +36,7 @@ def parse_args():
+         help="whether to capture videos of the agent performances (check out `videos` folder)")
+ 
+     # Algorithm specific arguments
+-    parser.add_argument("--env-id", type=str, default="HalfCheetah-v4",
++    parser.add_argument("--env-id", type=str, default="gym_STAR/My_Env-v1",
+         help="the id of the environment")
+     parser.add_argument("--total-timesteps", type=int, default=1000000,
+         help="total timesteps of the experiments")
+@@ -140,7 +141,8 @@ if __name__ == "__main__":
+     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+     if args.track:
+         import wandb
+-
++        os.environ["WANDB_API_KEY"] = "1efa41085884f0f2f57e32ca6f6cd45e021f482d"
++        os.environ["WANDB_MODE"] = "offline"
+         wandb.init(
+             project=args.wandb_project_name,
+             entity=args.wandb_entity,
+diff --git a/runs/gym_STAR/My_Env-v1__PPOmain__1__1680508062/events.out.tfevents.1680508089.DESKTOP-RPOI2A1.2896.0 b/runs/gym_STAR/My_Env-v1__PPOmain__1__1680508062/events.out.tfevents.1680508089.DESKTOP-RPOI2A1.2896.0
+deleted file mode 100644
+index 7b029e6..0000000
+Binary files a/runs/gym_STAR/My_Env-v1__PPOmain__1__1680508062/events.out.tfevents.1680508089.DESKTOP-RPOI2A1.2896.0 and /dev/null differ
+diff --git a/wandb/debug-cli.JinLab.log b/wandb/debug-cli.JinLab.log
+index e69de29..a4884e5 100644
+--- a/wandb/debug-cli.JinLab.log
++++ b/wandb/debug-cli.JinLab.log
+@@ -0,0 +1,325 @@
++2023-04-04 11:50:56 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 700, in urlopen
++    self._prepare_proxy(conn)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 996, in _prepare_proxy
++    conn.connect()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connection.py", line 364, in connect
++    self.sock = conn = self._connect_tls_proxy(hostname, conn)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connection.py", line 499, in _connect_tls_proxy
++    socket = ssl_wrap_socket(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\ssl_.py", line 453, in ssl_wrap_socket
++    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\ssl_.py", line 495, in _ssl_wrap_socket_impl
++    return ssl_context.wrap_socket(sock)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 500, in wrap_socket
++    return self.sslsocket_class._create(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1040, in _create
++    self.do_handshake()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1309, in do_handshake
++    self._sslobj.do_handshake()
++ssl.SSLEOFError: EOF occurred in violation of protocol (_ssl.c:1131)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 592, in increment
++    raise MaxRetryError(_pool, url, error or ResponseError(cause))
++urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)')))
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 563, in send
++    raise SSLError(e, request=request)
++requests.exceptions.SSLError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)')))
++2023-04-04 19:30:52 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 19:30:52 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 19:30:52 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:08:57 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:08:57 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:08:57 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:15:50 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:15:50 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:15:50 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:24:03 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:24:03 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:24:03 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:31:30 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:31:30 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-04 20:31:30 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-05 15:35:45 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-05 15:36:33 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
++    six.raise_from(e, None)
++  File "<string>", line 3, in raise_from
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
++    httplib_response = conn.getresponse()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 1348, in getresponse
++    response.begin()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 316, in begin
++    version, status, reason = self._read_status()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 277, in _read_status
++    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\socket.py", line 669, in readinto
++    return self._sock.recv_into(b)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1241, in recv_into
++    return self.read(nbytes, buffer)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1099, in read
++    return self._sslobj.read(len, buffer)
++socket.timeout: The read operation timed out
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 550, in increment
++    raise six.reraise(type(error), error, _stacktrace)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
++    raise value
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
++    httplib_response = self._make_request(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
++    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
++    raise ReadTimeoutError(
++urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 578, in send
++    raise ReadTimeout(e, request=request)
++requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++2023-04-05 15:53:33 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-05 15:54:08 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
++    six.raise_from(e, None)
++  File "<string>", line 3, in raise_from
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
++    httplib_response = conn.getresponse()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 1348, in getresponse
++    response.begin()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 316, in begin
++    version, status, reason = self._read_status()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 277, in _read_status
++    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\socket.py", line 669, in readinto
++    return self._sock.recv_into(b)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1241, in recv_into
++    return self.read(nbytes, buffer)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1099, in read
++    return self._sslobj.read(len, buffer)
++socket.timeout: The read operation timed out
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 550, in increment
++    raise six.reraise(type(error), error, _stacktrace)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
++    raise value
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
++    httplib_response = self._make_request(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
++    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
++    raise ReadTimeoutError(
++urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 578, in send
++    raise ReadTimeout(e, request=request)
++requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++2023-04-05 15:55:40 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-05 15:55:43 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 700, in urlopen
++    self._prepare_proxy(conn)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 996, in _prepare_proxy
++    conn.connect()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connection.py", line 364, in connect
++    self.sock = conn = self._connect_tls_proxy(hostname, conn)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connection.py", line 499, in _connect_tls_proxy
++    socket = ssl_wrap_socket(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\ssl_.py", line 453, in ssl_wrap_socket
++    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\ssl_.py", line 495, in _ssl_wrap_socket_impl
++    return ssl_context.wrap_socket(sock)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 500, in wrap_socket
++    return self.sslsocket_class._create(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1040, in _create
++    self.do_handshake()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1309, in do_handshake
++    self._sslobj.do_handshake()
++ssl.SSLEOFError: EOF occurred in violation of protocol (_ssl.c:1131)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 592, in increment
++    raise MaxRetryError(_pool, url, error or ResponseError(cause))
++urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)')))
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 563, in send
++    raise SSLError(e, request=request)
++requests.exceptions.SSLError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Max retries exceeded with url: /graphql (Caused by SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)')))
++2023-04-05 16:05:46 INFO open for scan: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230404_203023-xcytp9ss\run-xcytp9ss.wandb
++2023-04-05 16:06:20 INFO Retry attempt failed:
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
++    six.raise_from(e, None)
++  File "<string>", line 3, in raise_from
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
++    httplib_response = conn.getresponse()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 1348, in getresponse
++    response.begin()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 316, in begin
++    version, status, reason = self._read_status()
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\http\client.py", line 277, in _read_status
++    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\socket.py", line 669, in readinto
++    return self._sock.recv_into(b)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1241, in recv_into
++    return self.read(nbytes, buffer)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\ssl.py", line 1099, in read
++    return self._sslobj.read(len, buffer)
++socket.timeout: The read operation timed out
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 489, in send
++    resp = conn.urlopen(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 787, in urlopen
++    retries = retries.increment(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\util\retry.py", line 550, in increment
++    raise six.reraise(type(error), error, _stacktrace)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
++    raise value
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
++    httplib_response = self._make_request(
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
++    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
++    raise ReadTimeoutError(
++urllib3.exceptions.ReadTimeoutError: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\lib\retry.py", line 131, in __call__
++    result = self._call_fn(*args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\sdk\internal\internal_api.py", line 243, in execute
++    return self.client.execute(*args, **kwargs)  # type: ignore
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 52, in execute
++    result = self._get_result(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\client.py", line 60, in _get_result
++    return self.transport.execute(document, *args, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\wandb\vendor\gql-0.2.0\wandb_gql\transport\requests.py", line 38, in execute
++    request = requests.post(self.url, **post_args)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 115, in post
++    return request("post", url, data=data, json=json, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\api.py", line 59, in request
++    return session.request(method=method, url=url, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 587, in request
++    resp = self.send(prep, **send_kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\sessions.py", line 701, in send
++    r = adapter.send(request, **kwargs)
++  File "D:\anaconda3\envs\STAR_DEPLOY\lib\site-packages\requests\adapters.py", line 578, in send
++    raise ReadTimeout(e, request=request)
++requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=443): Read timed out. (read timeout=10)
