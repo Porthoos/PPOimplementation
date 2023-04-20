@@ -102,8 +102,8 @@ def make_env(env_id, idx, capture_video, run_name, gamma):
     return thunk
 
 
-def make_env_single(env_id):
-    env = gym.make(env_id)
+def make_env_single(env_id, render_mode=None):
+    env = gym.make(env_id, render_mode=render_mode)
     env = gym.wrappers.FlattenObservation(env)  # deal with dm_control's Dict observation space
     env = gym.wrappers.RecordEpisodeStatistics(env)
 
@@ -119,18 +119,15 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 def evaluata_policy_train(env, agent, normalize, gamma_, seed):
     n = 3
     steps = 0
-    mean, var = normalize.get()
     reward = 0
     for _ in range(n):
         done = False
         gamma = 1
         s, _ = env.reset(seed=seed)
-        # s = (s - mean) / np.sqrt(1e-8 + var)
         while not done:
             steps += 1
             action, logprob, _ = agent.get_action(torch.unsqueeze(torch.Tensor(s), 0))
             s_, r, terminated, truncated, _ = env.step(torch.Tensor(action))
-            # s_ = (s_ - mean) / np.sqrt(1e-8 + var)
             s = s_
             reward += r * gamma
             gamma *= gamma_
@@ -141,20 +138,19 @@ def evaluata_policy_train(env, agent, normalize, gamma_, seed):
 def evaluata_policy_test(env, agent, normalize, gamma_, seed):
     n = 3
     steps = 0
-    mean, var = normalize.get()
+    mean, var, count = normalize.get()
     env.obs_rms.mean = mean
     env.obs_rms.var = var
+    env.obs_rms.count = count
     reward = 0
     for _ in range(n):
         done = False
         gamma = 1
         s, _ = env.reset(seed=seed)
-        # s = (s - mean) / np.sqrt(1e-8 + var)
         while not done:
             steps += 1
             action, logprob, _ = agent.get_action(torch.unsqueeze(torch.Tensor(s), 0))
             s_, r, terminated, truncated, _ = env.step(torch.Tensor(action))
-            # s_ = (s_ - mean) / np.sqrt(1e-8 + var)
             s = s_
             reward += r * gamma
             gamma *= gamma_
@@ -301,7 +297,7 @@ if __name__ == "__main__":
             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.tensor(done, dtype=float).to(device)
 
             if global_step % args.eval_freq == 0:
-                eval_return_test, eval_length_test = evaluata_policy_test(envs, actor, evaluate_env, args.gamma, args.seed)
+                eval_return_test, eval_length_test = evaluata_policy_test(evaluate_env, actor, envs, args.gamma, args.seed)
                 eval_return_train, eval_length_train = evaluata_policy_train(envs, actor, envs, args.gamma, args.seed)
                 writer.add_scalar("eval/test_episode_return", eval_return_test, global_step)
                 writer.add_scalar("eval/test_episode_length", eval_length_test, global_step)
@@ -444,10 +440,16 @@ if __name__ == "__main__":
                     wandb.log({f"videos": wandb.Video(f"videos/{run_name}/{filename}")})
                     video_filenames.add(filename)
 
+    print(envs.obs_rms.mean)
+    print(envs.obs_rms.var)
+    print(envs.obs_rms.count)
+    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
+    with open(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.txt", "w") as f:
+        f.write(np.array2string(envs.obs_rms.mean).replace("[","").replace("]",""))
+        f.write("\n1e3\n")
+        f.write(np.array2string(envs.obs_rms.var).replace("[","").replace("]",""))
+        f.write("\n2e3\n")
+        f.write(np.array2string(envs.obs_rms.count).replace("[","").replace("]",""))
 
     envs.close()
     writer.close()
-
-    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
-    print(envs.obs_rms.mean)
-    print(envs.obs_rms.var)

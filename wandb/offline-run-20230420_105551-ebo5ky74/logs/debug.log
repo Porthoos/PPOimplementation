@@ -1,0 +1,24 @@
+2023-04-20 10:55:51,880 INFO    MainThread:16708 [wandb_setup.py:_flush():76] Configure stats pid to 16708
+2023-04-20 10:55:51,880 INFO    MainThread:16708 [wandb_setup.py:_flush():76] Loading settings from C:\Users\JinLab\.config\wandb\settings
+2023-04-20 10:55:51,880 INFO    MainThread:16708 [wandb_setup.py:_flush():76] Loading settings from D:\PycharmProjects\PPOimplementation\wandb\settings
+2023-04-20 10:55:51,880 INFO    MainThread:16708 [wandb_setup.py:_flush():76] Loading settings from environment variables: {'api_key': '***REDACTED***', 'mode': 'offline'}
+2023-04-20 10:55:51,880 INFO    MainThread:16708 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2023-04-20 10:55:51,880 INFO    MainThread:16708 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'ppo_seperate.py', 'program': 'D:\\PycharmProjects\\PPOimplementation\\ppo_seperate.py'}
+2023-04-20 10:55:51,881 INFO    MainThread:16708 [wandb_init.py:_log_setup():506] Logging user logs to D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230420_105551-ebo5ky74\logs\debug.log
+2023-04-20 10:55:51,881 INFO    MainThread:16708 [wandb_init.py:_log_setup():507] Logging internal logs to D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230420_105551-ebo5ky74\logs\debug-internal.log
+2023-04-20 10:55:51,882 INFO    MainThread:16708 [wandb_init.py:init():546] calling init triggers
+2023-04-20 10:55:51,882 INFO    MainThread:16708 [wandb_init.py:init():552] wandb.init called with sweep_config: {}
+config: {'exp_name': 'ppo_seperate', 'seed': 2200, 'torch_deterministic': True, 'cuda': True, 'track': True, 'wandb_project_name': 'cleanRL', 'wandb_entity': 'adoos', 'capture_video': False, 'env_id': 'gym_STAR/My_Env-v1', 'total_timesteps': 10000000, 'learning_rate': 0.0003, 'num_envs': 1, 'num_steps': 8192, 'anneal_lr': True, 'gamma': 0.99, 'gae_lambda': 0.95, 'num_minibatches': 32, 'update_epochs': 10, 'eval_freq': 5000.0, 'norm_adv': True, 'clip_coef': 0.2, 'clip_vloss': True, 'ent_coef': 0.0, 'vf_coef': 0.5, 'max_grad_norm': 0.5, 'target_kl': None, 'batch_size': 8192, 'minibatch_size': 256}
+2023-04-20 10:55:51,883 INFO    MainThread:16708 [wandb_init.py:init():602] starting backend
+2023-04-20 10:55:51,883 INFO    MainThread:16708 [wandb_init.py:init():606] setting up manager
+2023-04-20 10:55:51,892 INFO    MainThread:16708 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=spawn, using: spawn
+2023-04-20 10:55:51,902 INFO    MainThread:16708 [wandb_init.py:init():613] backend started and connected
+2023-04-20 10:55:51,928 INFO    MainThread:16708 [wandb_init.py:init():701] updated telemetry
+2023-04-20 10:55:51,978 INFO    MainThread:16708 [wandb_init.py:init():789] starting run threads in backend
+2023-04-20 10:55:59,216 INFO    MainThread:16708 [wandb_run.py:_console_start():2114] atexit reg
+2023-04-20 10:55:59,217 INFO    MainThread:16708 [wandb_run.py:_redirect():1969] redirect: SettingsConsole.WRAP_RAW
+2023-04-20 10:55:59,217 INFO    MainThread:16708 [wandb_run.py:_redirect():2034] Wrapping output streams.
+2023-04-20 10:55:59,217 INFO    MainThread:16708 [wandb_run.py:_redirect():2059] Redirects installed.
+2023-04-20 10:55:59,217 INFO    MainThread:16708 [wandb_init.py:init():831] run started, returning control to user process
+2023-04-20 10:55:59,218 INFO    MainThread:16708 [wandb_run.py:_tensorboard_callback():1396] tensorboard callback: runs/gym_STAR/My_Env-v1__ppo_seperate__2200__1681959346, True
+2023-04-20 10:56:22,636 WARNING MsgRouterThr:16708 [router.py:message_loop():77] message_loop has been closed

@@ -1,0 +1,152 @@
+diff --git a/gym-STAR/gym_STAR/env/My_Env_v1.py b/gym-STAR/gym_STAR/env/My_Env_v1.py
+index 9c08cb0..3edff02 100644
+--- a/gym-STAR/gym_STAR/env/My_Env_v1.py
++++ b/gym-STAR/gym_STAR/env/My_Env_v1.py
+@@ -19,6 +19,7 @@ import os
+ import glob
+ import time
+ from datetime import datetime
++import pygame
+ 
+ 
+ #TODO discrete deployment?
+@@ -29,6 +30,9 @@ class My_Env(gym.Env):
+ 
+         assert render_mode is None or render_mode in self.metadata["render_modes"]
+         self.render_mode = render_mode
++        self.window = None
++        self.clock = None
++        self.window_size = 1000
+ 
+         self.K = 6    #total users
+ 
+@@ -255,6 +259,9 @@ class My_Env(gym.Env):
+         else:
+             done = False
+ 
++        if self.render_mode == "human":
++            self.render_frame()
++
+         return np.array([next_state]).astype(np.float32), self.sum_rate, False, done, {}
+ 
+ 
+@@ -280,6 +287,10 @@ class My_Env(gym.Env):
+         self.calculate_CSI()
+         state = self.get_state()
+         # print(self.P_K_list)
++
++        if self.render_mode == "human":
++            self.render_frame()
++
+         return np.array([state]).astype(np.float32), {}
+ 
+     def render(self):
+@@ -287,3 +298,45 @@ class My_Env(gym.Env):
+             return self.render_frame()
+ 
+     def render_frame(self):
++        if self.window == None and self.render_mode == "human":
++            pygame.init()
++            pygame.display.init()
++            self.window = pygame.display.set_mode((self.window_size, self.window_size))
++
++        if self.clock == None and self.render_mode == "human":
++            self.clock = pygame.time.Clock()
++
++        canvas = pygame.Surface((self.window_size, self.window_size))
++        canvas.fill((255, 255, 255))
++
++        for i in range(self.K):
++            pygame.draw.circle(
++                canvas,
++                (255, 0, 0),
++                np.divide(self.P_K_list[0:2, i]+600, 2),
++                5,
++                width=0
++            )
++        start_pos = np.divide(np.add(self.STAR_position[0:2], 600), 2)
++        end_pos = np.subtract(start_pos, np.multiply(self.link_position[0:2], 10))
++        pygame.draw.line(
++            canvas,
++            (255, 0, 0),
++            start_pos,
++            end_pos
++        )
++
++        if self.render_mode == "human":
++            self.window.blit(canvas, canvas.get_rect())
++            pygame.event.pump()
++            pygame.display.update()
++            self.clock.tick(self.metadata["render_fps"])
++        else:
++            return np.transpose(
++                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
++            )
++
++    def close(self):
++        if self.window is not None:
++            pygame.display.quit()
++            pygame.quit()
+\ No newline at end of file
+diff --git a/ppo_seperate.py b/ppo_seperate.py
+index 79628bf..e9b7d9d 100644
+--- a/ppo_seperate.py
++++ b/ppo_seperate.py
+@@ -102,8 +102,8 @@ def make_env(env_id, idx, capture_video, run_name, gamma):
+     return thunk
+ 
+ 
+-def make_env_single(env_id):
+-    env = gym.make(env_id)
++def make_env_single(env_id, render_mode=None):
++    env = gym.make(env_id, render_mode=render_mode)
+     env = gym.wrappers.FlattenObservation(env)  # deal with dm_control's Dict observation space
+     env = gym.wrappers.RecordEpisodeStatistics(env)
+ 
+@@ -301,7 +301,7 @@ if __name__ == "__main__":
+             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.tensor(done, dtype=float).to(device)
+ 
+             if global_step % args.eval_freq == 0:
+-                eval_return_test, eval_length_test = evaluata_policy_test(envs, actor, evaluate_env, args.gamma, args.seed)
++                eval_return_test, eval_length_test = evaluata_policy_test(evaluate_env, actor, envs, args.gamma, args.seed)
+                 eval_return_train, eval_length_train = evaluata_policy_train(envs, actor, envs, args.gamma, args.seed)
+                 writer.add_scalar("eval/test_episode_return", eval_return_test, global_step)
+                 writer.add_scalar("eval/test_episode_length", eval_length_test, global_step)
+@@ -444,10 +444,13 @@ if __name__ == "__main__":
+                     wandb.log({f"videos": wandb.Video(f"videos/{run_name}/{filename}")})
+                     video_filenames.add(filename)
+ 
++    print(envs.obs_rms.mean)
++    print(envs.obs_rms.var)
++    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
++    with open(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.txt", "w") as f:
++        f.write(np.array2string(envs.obs_rms.mean).replace("[","").replace("]",""))
++        f.write("\n1e3\n")
++        f.write(np.array2string(envs.obs_rms.var).replace("[","").replace("]",""))
+ 
+     envs.close()
+     writer.close()
+-
+-    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
+-    print(envs.obs_rms.mean)
+-    print(envs.obs_rms.var)
+diff --git a/wandb/debug-cli.JinLab.log b/wandb/debug-cli.JinLab.log
+index 983423b..3cc6df5 100644
+--- a/wandb/debug-cli.JinLab.log
++++ b/wandb/debug-cli.JinLab.log
+@@ -494,3 +494,15 @@ requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=4
+ 2023-04-13 20:27:44 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
+ 2023-04-13 20:27:44 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
+ 2023-04-13 20:27:44 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-14 16:32:28 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-14 16:32:28 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-14 16:32:28 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-15 15:06:56 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-15 15:06:56 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-15 15:06:56 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-17 21:40:22 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-17 21:40:22 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-17 21:40:22 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-19 21:40:57 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-19 21:40:57 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-19 21:40:57 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/

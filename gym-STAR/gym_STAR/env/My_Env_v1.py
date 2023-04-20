@@ -19,6 +19,7 @@ import os
 import glob
 import time
 from datetime import datetime
+import pygame
 
 
 #TODO discrete deployment?
@@ -29,6 +30,9 @@ class My_Env(gym.Env):
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
+        self.window = None
+        self.clock = None
+        self.window_size = 1000
 
         self.K = 6    #total users
 
@@ -255,6 +259,9 @@ class My_Env(gym.Env):
         else:
             done = False
 
+        if self.render_mode == "human":
+            self.render_frame()
+
         return np.array([next_state]).astype(np.float32), self.sum_rate, False, done, {}
 
 
@@ -280,6 +287,10 @@ class My_Env(gym.Env):
         self.calculate_CSI()
         state = self.get_state()
         # print(self.P_K_list)
+
+        if self.render_mode == "human":
+            self.render_frame()
+
         return np.array([state]).astype(np.float32), {}
 
     def render(self):
@@ -287,3 +298,45 @@ class My_Env(gym.Env):
             return self.render_frame()
 
     def render_frame(self):
+        if self.window == None and self.render_mode == "human":
+            pygame.init()
+            pygame.display.init()
+            self.window = pygame.display.set_mode((self.window_size, self.window_size))
+
+        if self.clock == None and self.render_mode == "human":
+            self.clock = pygame.time.Clock()
+
+        canvas = pygame.Surface((self.window_size, self.window_size))
+        canvas.fill((255, 255, 255))
+
+        for i in range(self.K):
+            pygame.draw.circle(
+                canvas,
+                (255, 0, 0),
+                np.divide(self.P_K_list[0:2, i]+600, 2),
+                5,
+                width=0
+            )
+        start_pos = np.divide(np.add(self.STAR_position[0:2], 600), 2)
+        end_pos = np.subtract(start_pos, np.multiply(self.link_position[0:2], 10))
+        pygame.draw.line(
+            canvas,
+            (255, 0, 0),
+            start_pos,
+            end_pos
+        )
+
+        if self.render_mode == "human":
+            self.window.blit(canvas, canvas.get_rect())
+            pygame.event.pump()
+            pygame.display.update()
+            self.clock.tick(self.metadata["render_fps"])
+        else:
+            return np.transpose(
+                np.array(pygame.surfarray.pixels3d(canvas)), axes=(1, 0, 2)
+            )
+
+    def close(self):
+        if self.window is not None:
+            pygame.display.quit()
+            pygame.quit()

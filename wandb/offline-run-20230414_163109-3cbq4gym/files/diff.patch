@@ -1,0 +1,29 @@
+diff --git a/gym-STAR/gym_STAR/env/My_Env_v1.py b/gym-STAR/gym_STAR/env/My_Env_v1.py
+index 9c08cb0..ee30fac 100644
+--- a/gym-STAR/gym_STAR/env/My_Env_v1.py
++++ b/gym-STAR/gym_STAR/env/My_Env_v1.py
+@@ -287,3 +287,5 @@ class My_Env(gym.Env):
+             return self.render_frame()
+ 
+     def render_frame(self):
++
++        return
+diff --git a/ppo_seperate.py b/ppo_seperate.py
+index 79628bf..c9ed6df 100644
+--- a/ppo_seperate.py
++++ b/ppo_seperate.py
+@@ -448,6 +448,12 @@ if __name__ == "__main__":
+     envs.close()
+     writer.close()
+ 
+-    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
++
+     print(envs.obs_rms.mean)
+     print(envs.obs_rms.var)
++    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
++    with open(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.txt", "w") as f:
++        f.write("mean\n")
++        f.write(envs.obs_rms.mean)
++        f.write("\nvar\n")
++        f.write(envs.obs_rms.var)
+\ No newline at end of file

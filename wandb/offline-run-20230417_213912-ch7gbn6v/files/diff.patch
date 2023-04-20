@@ -1,0 +1,51 @@
+diff --git a/gym-STAR/gym_STAR/env/My_Env_v1.py b/gym-STAR/gym_STAR/env/My_Env_v1.py
+index 9c08cb0..ee30fac 100644
+--- a/gym-STAR/gym_STAR/env/My_Env_v1.py
++++ b/gym-STAR/gym_STAR/env/My_Env_v1.py
+@@ -287,3 +287,5 @@ class My_Env(gym.Env):
+             return self.render_frame()
+ 
+     def render_frame(self):
++
++        return
+diff --git a/ppo_seperate.py b/ppo_seperate.py
+index 79628bf..8ff056c 100644
+--- a/ppo_seperate.py
++++ b/ppo_seperate.py
+@@ -40,7 +40,7 @@ def parse_args():
+     # Algorithm specific arguments
+     parser.add_argument("--env-id", type=str, default="gym_STAR/My_Env-v1",
+         help="the id of the environment")
+-    parser.add_argument("--total-timesteps", type=int, default=10000000,
++    parser.add_argument("--total-timesteps", type=int, default=30000000,
+         help="total timesteps of the experiments")
+     parser.add_argument("--learning-rate", type=float, default=3e-4,
+         help="the learning rate of the optimizer")
+@@ -448,6 +448,12 @@ if __name__ == "__main__":
+     envs.close()
+     writer.close()
+ 
+-    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
++
+     print(envs.obs_rms.mean)
+     print(envs.obs_rms.var)
++    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
++    with open(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.txt", "w") as f:
++        f.write("mean\n")
++        f.write(envs.obs_rms.mean.tostring())
++        f.write("\nvar\n")
++        f.write(envs.obs_rms.var.tostring())
+diff --git a/wandb/debug-cli.JinLab.log b/wandb/debug-cli.JinLab.log
+index 983423b..bbec5e4 100644
+--- a/wandb/debug-cli.JinLab.log
++++ b/wandb/debug-cli.JinLab.log
+@@ -494,3 +494,9 @@ requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=4
+ 2023-04-13 20:27:44 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
+ 2023-04-13 20:27:44 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
+ 2023-04-13 20:27:44 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-14 16:32:28 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-14 16:32:28 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-14 16:32:28 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-15 15:06:56 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-15 15:06:56 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-15 15:06:56 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
