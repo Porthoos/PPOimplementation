@@ -1,0 +1,157 @@
+2023-04-22 17:36:13,346 INFO    StreamThr :23440 [internal.py:wandb_internal():87] W&B internal server running at pid: 23440, started at: 2023-04-22 17:36:13.345364
+2023-04-22 17:36:13,348 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: status
+2023-04-22 17:36:13,375 INFO    WriterThread:23440 [datastore.py:open_for_write():85] open: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230422_173613-y6ldbu7e\run-y6ldbu7e.wandb
+2023-04-22 17:36:13,436 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: run_start
+2023-04-22 17:36:13,445 DEBUG   HandlerThread:23440 [system_info.py:__init__():31] System info init
+2023-04-22 17:36:13,445 DEBUG   HandlerThread:23440 [system_info.py:__init__():46] System info init done
+2023-04-22 17:36:13,446 INFO    HandlerThread:23440 [system_monitor.py:start():183] Starting system monitor
+2023-04-22 17:36:13,446 INFO    SystemMonitor:23440 [system_monitor.py:_start():147] Starting system asset monitoring threads
+2023-04-22 17:36:13,446 INFO    HandlerThread:23440 [system_monitor.py:probe():204] Collecting system info
+2023-04-22 17:36:13,450 INFO    SystemMonitor:23440 [interfaces.py:start():187] Started cpu monitoring
+2023-04-22 17:36:13,451 DEBUG   HandlerThread:23440 [system_info.py:probe():195] Probing system
+2023-04-22 17:36:13,451 INFO    SystemMonitor:23440 [interfaces.py:start():187] Started disk monitoring
+2023-04-22 17:36:13,452 INFO    SystemMonitor:23440 [interfaces.py:start():187] Started memory monitoring
+2023-04-22 17:36:13,459 INFO    SystemMonitor:23440 [interfaces.py:start():187] Started network monitoring
+2023-04-22 17:36:13,460 DEBUG   HandlerThread:23440 [system_info.py:_probe_git():180] Probing git
+2023-04-22 17:36:13,554 DEBUG   HandlerThread:23440 [system_info.py:_probe_git():188] Probing git done
+2023-04-22 17:36:13,554 DEBUG   HandlerThread:23440 [system_info.py:probe():240] Probing system done
+2023-04-22 17:36:13,554 DEBUG   HandlerThread:23440 [system_monitor.py:probe():213] {'os': 'Windows-10-10.0.19044-SP0', 'python': '3.8.13', 'heartbeatAt': '2023-04-22T09:36:13.451702', 'startedAt': '2023-04-22T09:36:13.328379', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': 'D:\\PycharmProjects\\PPOimplementation\\ppo_normalizeLayer.py', 'codePath': 'ppo_normalizeLayer.py', 'git': {'remote': 'https://github.com/Porthoos/PPOimplementation.git', 'commit': '6fcbb92bb2ec9ee6a8c2707af4c910b3652ff91f'}, 'email': 'aramiis@163.com', 'root': 'D:/PycharmProjects/PPOimplementation', 'host': 'DESKTOP-RPOI2A1', 'username': 'JinLab', 'executable': 'D:\\anaconda3\\envs\\STAR_DEPLOY\\python.exe', 'cpu_count': 4, 'cpu_count_logical': 8, 'cpu_freq': {'current': 3408.0, 'min': 0.0, 'max': 3408.0}, 'cpu_freq_per_core': [{'current': 3408.0, 'min': 0.0, 'max': 3408.0}], 'disk': {'total': 931.5097618103027, 'used': 38.01479721069336}, 'memory': {'total': 15.909587860107422}}
+2023-04-22 17:36:13,554 INFO    HandlerThread:23440 [system_monitor.py:probe():214] Finished collecting system info
+2023-04-22 17:36:13,554 INFO    HandlerThread:23440 [system_monitor.py:probe():217] Publishing system info
+2023-04-22 17:36:13,554 DEBUG   HandlerThread:23440 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-04-22 17:36:13,555 DEBUG   HandlerThread:23440 [system_info.py:_save_pip():67] Saving pip packages done
+2023-04-22 17:36:13,555 DEBUG   HandlerThread:23440 [system_info.py:_save_conda():74] Saving list of conda packages installed into the current environment
+2023-04-22 17:36:20,175 DEBUG   HandlerThread:23440 [system_info.py:_save_conda():86] Saving conda packages done
+2023-04-22 17:36:20,176 DEBUG   HandlerThread:23440 [system_info.py:_save_code():89] Saving code
+2023-04-22 17:36:20,233 DEBUG   HandlerThread:23440 [system_info.py:_save_code():110] Saving code done
+2023-04-22 17:36:20,233 DEBUG   HandlerThread:23440 [system_info.py:_save_patches():127] Saving git patches
+2023-04-22 17:36:20,873 DEBUG   HandlerThread:23440 [system_info.py:_save_patches():169] Saving git patches done
+2023-04-22 17:36:20,873 INFO    HandlerThread:23440 [system_monitor.py:probe():219] Finished publishing system info
+2023-04-22 17:36:20,889 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: status_report
+2023-04-22 17:36:20,890 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-22 17:36:20,890 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: status_report
+2023-04-22 17:36:20,895 INFO    HandlerThread:23440 [handler.py:handle_tbrecord():747] handling tbrecord: tbrecord {
+  log_dir: "runs/gym_STAR/My_Env-v1__ppo_normalizeLayer__2200__1682156167"
+  save: true
+}
+control {
+  relay_id: "3a148c46d6d84e25ae3a8b626cdee5a7"
+}
+_info {
+  stream_id: "y6ldbu7e"
+}
+
+2023-04-22 17:36:20,895 DEBUG   HandlerThread:23440 [config_util.py:dict_from_config_file():103] no default config file found in config-defaults.yaml
+2023-04-22 17:36:21,028 DEBUG   SenderThread:23440 [sender.py:send():336] send: exit
+2023-04-22 17:36:21,028 INFO    SenderThread:23440 [sender.py:send_exit():559] handling exit code: 1
+2023-04-22 17:36:21,028 INFO    SenderThread:23440 [sender.py:send_exit():561] handling runtime: 7
+2023-04-22 17:36:21,029 INFO    SenderThread:23440 [sender.py:_save_file():1332] saving file wandb-summary.json with policy end
+2023-04-22 17:36:21,029 INFO    SenderThread:23440 [sender.py:send_exit():567] send defer
+2023-04-22 17:36:21,030 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:21,030 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 0
+2023-04-22 17:36:21,030 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:21,030 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 0
+2023-04-22 17:36:21,031 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 1
+2023-04-22 17:36:21,031 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:21,031 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 1
+2023-04-22 17:36:21,031 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:21,031 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 1
+2023-04-22 17:36:21,032 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 2
+2023-04-22 17:36:21,032 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:21,032 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 2
+2023-04-22 17:36:21,033 INFO    HandlerThread:23440 [system_monitor.py:finish():193] Stopping system monitor
+2023-04-22 17:36:21,033 DEBUG   SystemMonitor:23440 [system_monitor.py:_start():161] Starting system metrics aggregation loop
+2023-04-22 17:36:21,034 DEBUG   SystemMonitor:23440 [system_monitor.py:_start():168] Finished system metrics aggregation loop
+2023-04-22 17:36:21,034 DEBUG   SystemMonitor:23440 [system_monitor.py:_start():172] Publishing last batch of metrics
+2023-04-22 17:36:21,035 INFO    HandlerThread:23440 [interfaces.py:finish():199] Joined cpu monitor
+2023-04-22 17:36:21,036 INFO    HandlerThread:23440 [interfaces.py:finish():199] Joined disk monitor
+2023-04-22 17:36:21,036 INFO    HandlerThread:23440 [interfaces.py:finish():199] Joined memory monitor
+2023-04-22 17:36:21,036 INFO    HandlerThread:23440 [interfaces.py:finish():199] Joined network monitor
+2023-04-22 17:36:21,037 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:21,037 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 2
+2023-04-22 17:36:21,037 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 3
+2023-04-22 17:36:21,038 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:21,038 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 3
+2023-04-22 17:36:21,038 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:21,038 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 3
+2023-04-22 17:36:21,038 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 4
+2023-04-22 17:36:21,038 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:21,039 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 4
+2023-04-22 17:36:25,222 DEBUG   Thread-29 :23440 [tb_watcher.py:_process_events():274] Encountered tensorboard directory watcher error: [WinError 1314] 客户端没有所需的特权。: 'D:\\PycharmProjects\\PPOimplementation\\runs\\gym_STAR\\My_Env-v1__ppo_normalizeLayer__2200__1682156167\\events.out.tfevents.1682156180.DESKTOP-RPOI2A1.9508.0' -> 'D:\\PycharmProjects\\PPOimplementation\\wandb\\offline-run-20230422_173613-y6ldbu7e\\files\\events.out.tfevents.1682156180.DESKTOP-RPOI2A1.9508.0'
+2023-04-22 17:36:36,086 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: poll_exit
+2023-04-22 17:36:36,086 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: status_report
+2023-04-22 17:36:36,086 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,086 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-22 17:36:36,087 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 4
+2023-04-22 17:36:36,087 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: status_report
+2023-04-22 17:36:36,087 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 5
+2023-04-22 17:36:36,087 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-22 17:36:36,087 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: poll_exit
+2023-04-22 17:36:36,087 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: status_report
+2023-04-22 17:36:36,088 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: status_report
+2023-04-22 17:36:36,088 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,088 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: status_report
+2023-04-22 17:36:36,088 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 5
+2023-04-22 17:36:36,088 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: status_report
+2023-04-22 17:36:36,088 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,089 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 5
+2023-04-22 17:36:36,089 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 6
+2023-04-22 17:36:36,089 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,089 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 6
+2023-04-22 17:36:36,089 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,089 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 6
+2023-04-22 17:36:36,089 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 7
+2023-04-22 17:36:36,089 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: status_report
+2023-04-22 17:36:36,090 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,090 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 7
+2023-04-22 17:36:36,090 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: status_report
+2023-04-22 17:36:36,090 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,090 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 7
+2023-04-22 17:36:36,090 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 8
+2023-04-22 17:36:36,090 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,090 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 8
+2023-04-22 17:36:36,091 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,091 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 8
+2023-04-22 17:36:36,091 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 9
+2023-04-22 17:36:36,091 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,091 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 9
+2023-04-22 17:36:36,091 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,091 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 9
+2023-04-22 17:36:36,091 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 10
+2023-04-22 17:36:36,092 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,092 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 10
+2023-04-22 17:36:36,092 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,092 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 10
+2023-04-22 17:36:36,092 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 11
+2023-04-22 17:36:36,092 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,092 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 11
+2023-04-22 17:36:36,093 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,093 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 11
+2023-04-22 17:36:36,093 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 12
+2023-04-22 17:36:36,093 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,093 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 12
+2023-04-22 17:36:36,093 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,093 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 12
+2023-04-22 17:36:36,093 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 13
+2023-04-22 17:36:36,093 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,094 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 13
+2023-04-22 17:36:36,094 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,094 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 13
+2023-04-22 17:36:36,094 INFO    SenderThread:23440 [sender.py:transition_state():587] send defer: 14
+2023-04-22 17:36:36,094 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: defer
+2023-04-22 17:36:36,094 DEBUG   SenderThread:23440 [sender.py:send():336] send: final
+2023-04-22 17:36:36,095 INFO    HandlerThread:23440 [handler.py:handle_request_defer():170] handle defer: 14
+2023-04-22 17:36:36,095 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: defer
+2023-04-22 17:36:36,095 INFO    SenderThread:23440 [sender.py:send_request_defer():583] handle sender defer: 14
+2023-04-22 17:36:36,096 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: poll_exit
+2023-04-22 17:36:36,096 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: server_info
+2023-04-22 17:36:36,096 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: get_summary
+2023-04-22 17:36:36,096 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: poll_exit
+2023-04-22 17:36:36,096 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: sampled_history
+2023-04-22 17:36:36,096 DEBUG   SenderThread:23440 [sender.py:send_request():363] send_request: server_info
+2023-04-22 17:36:36,097 INFO    MainThread:23440 [wandb_run.py:_footer_history_summary_info():3422] rendering history
+2023-04-22 17:36:36,097 INFO    MainThread:23440 [wandb_run.py:_footer_history_summary_info():3454] rendering summary
+2023-04-22 17:36:36,097 DEBUG   HandlerThread:23440 [handler.py:handle_request():144] handle_request: shutdown
+2023-04-22 17:36:36,097 INFO    HandlerThread:23440 [handler.py:finish():842] shutting down handler
+2023-04-22 17:36:37,107 INFO    WriterThread:23440 [datastore.py:close():298] close: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230422_173613-y6ldbu7e\run-y6ldbu7e.wandb
+2023-04-22 17:36:37,107 INFO    SenderThread:23440 [sender.py:finish():1504] shutting down sender

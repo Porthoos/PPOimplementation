@@ -4,6 +4,8 @@ gym_STAR.egg-info/PKG-INFO
 gym_STAR.egg-info/SOURCES.txt
 gym_STAR.egg-info/dependency_links.txt
 gym_STAR.egg-info/top_level.txt
+gym_STAR/env/Fix.py
+gym_STAR/env/Fix_Pos.py
 gym_STAR/env/My_Env_v1.py
 gym_STAR/env/RIS_Env.py
 gym_STAR/env/__init__.py

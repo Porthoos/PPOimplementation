@@ -38,9 +38,9 @@ def parse_args():
         help="whether to capture videos of the agent performances (check out `videos` folder)")
 
     # Algorithm specific arguments
-    parser.add_argument("--env-id", type=str, default="gym_STAR/My_Env-v1",
+    parser.add_argument("--env-id", type=str, default="gym_STAR/Fix-v1",
         help="the id of the environment")
-    parser.add_argument("--total-timesteps", type=int, default=20000000,
+    parser.add_argument("--total-timesteps", type=int, default=25000000,
         help="total timesteps of the experiments")
     parser.add_argument("--learning-rate", type=float, default=3e-4,
         help="the learning rate of the optimizer")
@@ -102,8 +102,8 @@ def make_env(env_id, idx, capture_video, run_name, gamma):
     return thunk
 
 
-def make_env_single(env_id, render_mode=None):
-    env = gym.make(env_id, render_mode=render_mode)
+def make_env_single(env_id, render_mode=None, FD=None):
+    env = gym.make(env_id, render_mode=render_mode, FD=FD)
     env = gym.wrappers.FlattenObservation(env)  # deal with dm_control's Dict observation space
     env = gym.wrappers.RecordEpisodeStatistics(env)
 
@@ -130,7 +130,7 @@ def evaluata_policy_train(env, agent, normalize, gamma_, seed):
             s_, r, terminated, truncated, _ = env.step(torch.Tensor(action))
             s = s_
             reward += r * gamma
-            gamma *= gamma_
+            # gamma *= gamma_
             done = np.logical_or(terminated, truncated)
     return reward / n, steps / n
 
@@ -138,10 +138,6 @@ def evaluata_policy_train(env, agent, normalize, gamma_, seed):
 def evaluata_policy_test(env, agent, normalize, gamma_, seed):
     n = 3
     steps = 0
-    # mean, var, count = normalize.get()
-    # env.obs_rms.mean = mean
-    # env.obs_rms.var = var
-    # env.obs_rms.count = count
     reward = 0
     for _ in range(n):
         done = False
@@ -153,7 +149,7 @@ def evaluata_policy_test(env, agent, normalize, gamma_, seed):
             s_, r, terminated, truncated, _ = env.step(torch.Tensor(action))
             s = s_
             reward += r * gamma
-            gamma *= gamma_
+            # gamma *= gamma_
             done = np.logical_or(terminated, truncated)
     return reward / n, steps / n
 
@@ -213,7 +209,7 @@ if __name__ == "__main__":
             # monitor_gym=True, no longer works for gymnasium
             save_code=True,
         )
-    writer = SummaryWriter(f"runs/{run_name}")
+    writer = SummaryWriter(f"eva/runs/{run_name}")
     writer.add_text(
         "hyperparameters",
         "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
@@ -237,8 +233,26 @@ if __name__ == "__main__":
     envs = gym.wrappers.ClipAction(envs)
     # normalize_train = NormalizeObservation
     # envs = normalize_train(envs)
+    _, info = envs.reset()
 
-    evaluate_env = make_env_single(args.env_id)
+    # with open(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.txt", "w") as f:
+    #     f.write(np.array2string(np.array(info["FD"]), formatter={'float_kind':lambda x: "%.2f" % x}))
+    # np.savetxt(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}BK.txt",
+    #            np.array(info["FD"][0]).view(float))
+    # np.savetxt(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}RK.txt",
+    #            np.array(info["FD"][1]).view(float))
+    # np.savetxt(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}BR.txt",
+    #            np.array(info["FD"][2]).view(float))
+    # print(info["FD"][0])
+    # np.save(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}BK.npy",
+    #         np.array(info["FD"][0], dtype='c').view(float))
+    # np.save(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}RK.npy",
+    #         np.array(info["FD"][1], dtype='c').view(float))
+    # np.save(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}BR.npy",
+    #         np.array(info["FD"][2], dtype='c').view(float))
+    # print(np.load(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}BK.npy"))
+
+    evaluate_env = make_env_single(args.env_id, FD=info["FD"])
     evaluate_env = gym.wrappers.ClipAction(evaluate_env)
     # normalize_test = NormalizeObservation
     # evaluate_env = normalize_test(evaluate_env)
@@ -321,7 +335,7 @@ if __name__ == "__main__":
 
             episode_length += 1
             episode_reward += gamma * reward
-            gamma *= args.gamma
+            # gamma *= args.gamma
 
             if done:
                 writer.add_scalar("train/episodic_return", episode_reward, global_step)
@@ -441,16 +455,11 @@ if __name__ == "__main__":
                     wandb.log({f"videos": wandb.Video(f"videos/{run_name}/{filename}")})
                     video_filenames.add(filename)
 
-    print(envs.obs_rms.mean)
-    print(envs.obs_rms.var)
-    print(envs.obs_rms.count)
-    torch.save(actor, f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
-    with open(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.txt", "w") as f:
-        f.write(np.array2string(envs.obs_rms.mean).replace("[","").replace("]",""))
-        f.write("\n1e3\n")
-        f.write(np.array2string(envs.obs_rms.var).replace("[","").replace("]",""))
-        f.write("\n2e3\n")
-        f.write(np.array2string(envs.obs_rms.count).replace("[","").replace("]",""))
+    np.save(f"./eva/model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.npy", info["FD"])
+    torch.save(actor, f"./eva/model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.pt")
+    print(info["FD"])
+    # with open(f"./model/{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}.txt", "w") as f:
+    #     f.write(np.array2string(np.ndarray(info["FD"])))
 
     envs.close()
     writer.close()

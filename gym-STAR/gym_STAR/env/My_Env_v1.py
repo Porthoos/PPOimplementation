@@ -25,7 +25,7 @@ import pygame
 #TODO discrete deployment?
 class My_Env(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
-    def __init__(self, render_mode=None):
+    def __init__(self, render_mode=None, FD=None):
         super(My_Env, self).__init__()
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -54,16 +54,22 @@ class My_Env(gym.Env):
         self.CSI_R_K = np.random.normal(scale=1, size=(self.N, self.K)) + np.random.normal(scale=1, size=(self.N, self.K)) * 1j
         self.CSI_B_R = np.random.normal(scale=1, size=(self.N, self.M)) + np.random.normal(scale=1, size=(self.N, self.M)) * 1j
 
-        self.FD_B_K = np.random.normal(scale=1, size=(self.M, self.K, self.T)) + np.random.normal(scale=1, size=(self.M, self.K, self.T)) * 1j
-        self.FD_R_K = np.random.normal(scale=1, size=(self.N, self.K, self.T)) + np.random.normal(scale=1, size=(self.N, self.K, self.T)) * 1j
-        self.FD_B_R = np.random.normal(scale=1, size=(self.N, self.M, self.T)) + np.random.normal(scale=1, size=(self.N, self.M, self.T)) * 1j
+        if FD is None:
+            self.FD_B_K = np.random.normal(scale=1, size=(self.M, self.K, self.T)) + np.random.normal(scale=1, size=(self.M, self.K, self.T)) * 1j
+            self.FD_R_K = np.random.normal(scale=1, size=(self.N, self.K, self.T)) + np.random.normal(scale=1, size=(self.N, self.K, self.T)) * 1j
+            self.FD_B_R = np.random.normal(scale=1, size=(self.N, self.M, self.T)) + np.random.normal(scale=1, size=(self.N, self.M, self.T)) * 1j
 
-        # fading intensity
-        self.fading_scale_BS = 0.1
-        self.fading_scale_RIS = 0.2
-        self.FD_B_K = self.fading_scale_BS * self.FD_B_K
-        self.FD_R_K = self.fading_scale_RIS * self.FD_R_K
-        self.FD_B_R = self.fading_scale_RIS * self.FD_B_R #TODO should be RIS fading scale?
+            # fading intensity
+            self.fading_scale_BS = 0.1
+            self.fading_scale_RIS = 0.2
+            self.FD_B_K = self.fading_scale_BS * self.FD_B_K
+            self.FD_R_K = self.fading_scale_RIS * self.FD_R_K
+            self.FD_B_R = self.fading_scale_RIS * self.FD_B_R #TODO should be RIS fading scale?
+        else:
+            self.FD_B_K = FD[0]
+            self.FD_R_K = FD[1]
+            self.FD_B_R = FD[2]
+
         self.Rice = 5 # Rician factor
         self.scale = 10000
 
@@ -72,9 +78,9 @@ class My_Env(gym.Env):
         self.STAR_position = [0, 0, 10]
         self.link_position = [0, 0, 0]
         self.type = np.zeros(shape=(self.K, 1))
-        self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
-        self.P_K_list[:, :3] += 200
-        self.P_K_list[:, 3:] -= 200
+        self.P_K_list = np.random.uniform(low=-500, high=500, size=(3, self.K))
+        # self.P_K_list[:, :3] += 200
+        # self.P_K_list[:, 3:] -= 200
         self.P_K_list[2, :] = 0
         self.t = 0
 
@@ -268,9 +274,8 @@ class My_Env(gym.Env):
     #TODO reset the environmrnt, user position, time, observation state, STAR position???
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
-        self.P_K_list[:, :3] += 200
-        self.P_K_list[:, 3:] -= 200
+        self.P_K_list = np.random.uniform(low=-500, high=500, size=(3, self.K))
+        # self.P_K_list[:, :] -= 500
         self.P_K_list[2, :] = 0
 
         # self.FD_B_K = np.random.normal(scale=1, size=(self.M, self.K, self.T)) + np.random.normal(scale=1, size=(self.M, self.K, self.T)) * 1j
@@ -291,7 +296,7 @@ class My_Env(gym.Env):
         if self.render_mode == "human":
             self.render_frame()
 
-        return np.array([state]).astype(np.float32), {}
+        return np.array([state]).astype(np.float32), {"FD": [self.FD_B_K, self.FD_R_K, self.FD_B_R]}
 
     def render(self):
         if self.render_mode == "rgb_array":
@@ -340,3 +345,10 @@ class My_Env(gym.Env):
         if self.window is not None:
             pygame.display.quit()
             pygame.quit()
+
+    def get_FD(self):
+        return self.FD_B_K, self.FD_R_K, self.FD_B_R
+    def set_FD(self, FD_B_K, FD_R_K, FD_B_R):
+        self.FD_B_K = FD_B_K
+        self.FD_R_K = FD_R_K
+        self.FD_B_R = FD_B_R

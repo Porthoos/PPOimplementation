@@ -1,0 +1,42 @@
+{
+    "os": "Windows-10-10.0.19044-SP0",
+    "python": "3.8.13",
+    "heartbeatAt": "2023-04-22T09:07:28.797748",
+    "startedAt": "2023-04-22T09:07:28.599682",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "D:\\PycharmProjects\\PPOimplementation\\ppo_normalizeLayer.py",
+    "codePath": "ppo_normalizeLayer.py",
+    "git": {
+        "remote": "https://github.com/Porthoos/PPOimplementation.git",
+        "commit": "6fcbb92bb2ec9ee6a8c2707af4c910b3652ff91f"
+    },
+    "email": "aramiis@163.com",
+    "root": "D:/PycharmProjects/PPOimplementation",
+    "host": "DESKTOP-RPOI2A1",
+    "username": "JinLab",
+    "executable": "D:\\anaconda3\\envs\\STAR_DEPLOY\\python.exe",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 3408.0,
+        "min": 0.0,
+        "max": 3408.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 3408.0,
+            "min": 0.0,
+            "max": 3408.0
+        }
+    ],
+    "disk": {
+        "total": 931.5097618103027,
+        "used": 38.01338195800781
+    },
+    "memory": {
+        "total": 15.909587860107422
+    }
+}

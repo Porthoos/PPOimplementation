@@ -7,6 +7,7 @@ from ppo_seperate import make_env_single
 import numpy as np
 from gym_normalize import NormalizeObservation
 
+# env = np.load('model/gym_STAR/My_Env-v1__ppo_normalizeLayer__2200__1682157540.npy', allow_pickle=True)
 actor = torch.load("model/gym_STAR/My_Env-v1__ppo_seperate__2200__1681852772.pt")
 
 f = open("model/gym_STAR/My_Env-v1__ppo_seperate__2200__1681852772.txt")
