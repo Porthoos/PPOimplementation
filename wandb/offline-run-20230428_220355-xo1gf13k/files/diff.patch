@@ -1,0 +1,33 @@
+diff --git a/ppo_normalizeLayer.py b/ppo_normalizeLayer.py
+index 7a41adc..4511238 100644
+--- a/ppo_normalizeLayer.py
++++ b/ppo_normalizeLayer.py
+@@ -38,7 +38,7 @@ def parse_args():
+         help="whether to capture videos of the agent performances (check out `videos` folder)")
+ 
+     # Algorithm specific arguments
+-    parser.add_argument("--env-id", type=str, default="gym_STAR/Fix-v1",
++    parser.add_argument("--env-id", type=str, default="gym_STAR/Fix_Pos-v1",
+         help="the id of the environment")
+     parser.add_argument("--total-timesteps", type=int, default=25000000,
+         help="total timesteps of the experiments")
+@@ -87,7 +87,7 @@ def make_env(env_id, idx, capture_video, run_name, gamma):
+             env = gym.make(env_id, render_mode="rgb_array")
+         else:
+             env = gym.make(env_id)
+-        env = gym.wrappers.FlattenObservation(env)  # deal with dm_control's Dict observation space
++        env = gym.wrappers.FlattenObservation(env)  # deal with dm`_control's Dict observation space
+         env = gym.wrappers.RecordEpisodeStatistics(env)
+         if capture_video:
+             if idx == 0:
+diff --git a/wandb/debug-cli.JinLab.log b/wandb/debug-cli.JinLab.log
+index 2d9c106..90c2fcf 100644
+--- a/wandb/debug-cli.JinLab.log
++++ b/wandb/debug-cli.JinLab.log
+@@ -554,3 +554,6 @@ requests.exceptions.ReadTimeout: HTTPSConnectionPool(host='api.wandb.ai', port=4
+ 2023-04-25 18:44:09 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
+ 2023-04-25 18:44:09 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
+ 2023-04-25 18:44:09 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-27 16:37:07 WARNING Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-27 16:37:07 WARNING Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/
++2023-04-27 16:37:07 WARNING Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'SSLError(SSLEOFError(8, 'EOF occurred in violation of protocol (_ssl.c:1131)'))': /api/5288891/envelope/

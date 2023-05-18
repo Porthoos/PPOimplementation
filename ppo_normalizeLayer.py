@@ -87,7 +87,7 @@ def make_env(env_id, idx, capture_video, run_name, gamma):
             env = gym.make(env_id, render_mode="rgb_array")
         else:
             env = gym.make(env_id)
-        env = gym.wrappers.FlattenObservation(env)  # deal with dm_control's Dict observation space
+        env = gym.wrappers.FlattenObservation(env)  # deal with dm`_control's Dict observation space
         env = gym.wrappers.RecordEpisodeStatistics(env)
         if capture_video:
             if idx == 0:
@@ -149,7 +149,7 @@ def evaluata_policy_test(env, agent, normalize, gamma_, seed):
             s_, r, terminated, truncated, _ = env.step(torch.Tensor(action))
             s = s_
             reward += r * gamma
-            # gamma *= gamma_
+            gamma *= gamma_
             done = np.logical_or(terminated, truncated)
     return reward / n, steps / n
 
@@ -391,6 +391,7 @@ if __name__ == "__main__":
                     approx_kl = ((ratio - 1) - logratio).mean()
                     clipfracs += [((ratio - 1.0).abs() > args.clip_coef).float().mean().item()]
 
+                #TODO mini batch advantage
                 mb_advantages = b_advantages[mb_inds]
                 if args.norm_adv:
                     mb_advantages = (mb_advantages - mb_advantages.mean()) / (mb_advantages.std() + 1e-8)

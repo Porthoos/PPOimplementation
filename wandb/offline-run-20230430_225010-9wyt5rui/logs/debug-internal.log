@@ -1,0 +1,50 @@
+2023-04-30 22:50:10,135 INFO    StreamThr :22972 [internal.py:wandb_internal():87] W&B internal server running at pid: 22972, started at: 2023-04-30 22:50:10.135556
+2023-04-30 22:50:10,137 DEBUG   HandlerThread:22972 [handler.py:handle_request():144] handle_request: status
+2023-04-30 22:50:10,189 INFO    WriterThread:22972 [datastore.py:open_for_write():85] open: D:\PycharmProjects\PPOimplementation\wandb\offline-run-20230430_225010-9wyt5rui\run-9wyt5rui.wandb
+2023-04-30 22:50:10,299 DEBUG   HandlerThread:22972 [handler.py:handle_request():144] handle_request: run_start
+2023-04-30 22:50:10,310 DEBUG   HandlerThread:22972 [system_info.py:__init__():31] System info init
+2023-04-30 22:50:10,311 DEBUG   HandlerThread:22972 [system_info.py:__init__():46] System info init done
+2023-04-30 22:50:10,311 INFO    HandlerThread:22972 [system_monitor.py:start():183] Starting system monitor
+2023-04-30 22:50:10,312 INFO    SystemMonitor:22972 [system_monitor.py:_start():147] Starting system asset monitoring threads
+2023-04-30 22:50:10,312 INFO    HandlerThread:22972 [system_monitor.py:probe():204] Collecting system info
+2023-04-30 22:50:10,316 INFO    SystemMonitor:22972 [interfaces.py:start():187] Started cpu monitoring
+2023-04-30 22:50:10,317 DEBUG   HandlerThread:22972 [system_info.py:probe():195] Probing system
+2023-04-30 22:50:10,317 INFO    SystemMonitor:22972 [interfaces.py:start():187] Started disk monitoring
+2023-04-30 22:50:10,318 INFO    SystemMonitor:22972 [interfaces.py:start():187] Started memory monitoring
+2023-04-30 22:50:10,324 INFO    SystemMonitor:22972 [interfaces.py:start():187] Started network monitoring
+2023-04-30 22:50:10,325 DEBUG   HandlerThread:22972 [system_info.py:_probe_git():180] Probing git
+2023-04-30 22:50:10,470 DEBUG   HandlerThread:22972 [system_info.py:_probe_git():188] Probing git done
+2023-04-30 22:50:10,470 DEBUG   HandlerThread:22972 [system_info.py:probe():240] Probing system done
+2023-04-30 22:50:10,470 DEBUG   HandlerThread:22972 [system_monitor.py:probe():213] {'os': 'Windows-10-10.0.19044-SP0', 'python': '3.8.13', 'heartbeatAt': '2023-04-30T14:50:10.317545', 'startedAt': '2023-04-30T14:50:10.083590', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': 'D:\\PycharmProjects\\PPOimplementation\\ppo_normalizeLayer.py', 'codePath': 'ppo_normalizeLayer.py', 'git': {'remote': 'https://github.com/Porthoos/PPOimplementation.git', 'commit': 'a26acb552623a2880e6c839658157ae56839f215'}, 'email': 'aramiis@163.com', 'root': 'D:/PycharmProjects/PPOimplementation', 'host': 'DESKTOP-RPOI2A1', 'username': 'JinLab', 'executable': 'D:\\anaconda3\\envs\\STAR_DEPLOY\\python.exe', 'cpu_count': 4, 'cpu_count_logical': 8, 'cpu_freq': {'current': 3408.0, 'min': 0.0, 'max': 3408.0}, 'cpu_freq_per_core': [{'current': 3408.0, 'min': 0.0, 'max': 3408.0}], 'disk': {'total': 931.5097618103027, 'used': 38.572998046875}, 'memory': {'total': 15.909587860107422}}
+2023-04-30 22:50:10,470 INFO    HandlerThread:22972 [system_monitor.py:probe():214] Finished collecting system info
+2023-04-30 22:50:10,470 INFO    HandlerThread:22972 [system_monitor.py:probe():217] Publishing system info
+2023-04-30 22:50:10,470 DEBUG   HandlerThread:22972 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-04-30 22:50:10,471 DEBUG   HandlerThread:22972 [system_info.py:_save_pip():67] Saving pip packages done
+2023-04-30 22:50:10,471 DEBUG   HandlerThread:22972 [system_info.py:_save_conda():74] Saving list of conda packages installed into the current environment
+2023-04-30 22:50:22,431 DEBUG   HandlerThread:22972 [system_info.py:_save_conda():86] Saving conda packages done
+2023-04-30 22:50:22,431 DEBUG   HandlerThread:22972 [system_info.py:_save_code():89] Saving code
+2023-04-30 22:50:22,524 DEBUG   HandlerThread:22972 [system_info.py:_save_code():110] Saving code done
+2023-04-30 22:50:22,524 DEBUG   HandlerThread:22972 [system_info.py:_save_patches():127] Saving git patches
+2023-04-30 22:50:23,146 DEBUG   HandlerThread:22972 [system_info.py:_save_patches():169] Saving git patches done
+2023-04-30 22:50:23,148 INFO    HandlerThread:22972 [system_monitor.py:probe():219] Finished publishing system info
+2023-04-30 22:50:23,164 DEBUG   HandlerThread:22972 [handler.py:handle_request():144] handle_request: status_report
+2023-04-30 22:50:23,164 DEBUG   HandlerThread:22972 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-30 22:50:23,164 DEBUG   HandlerThread:22972 [handler.py:handle_request():144] handle_request: status_report
+2023-04-30 22:50:23,165 DEBUG   HandlerThread:22972 [handler.py:handle_request():144] handle_request: keepalive
+2023-04-30 22:50:23,165 DEBUG   SenderThread:22972 [sender.py:send_request():363] send_request: status_report
+2023-04-30 22:50:23,165 DEBUG   SenderThread:22972 [sender.py:send_request():363] send_request: status_report
+2023-04-30 22:50:23,167 INFO    HandlerThread:22972 [handler.py:handle_tbrecord():747] handling tbrecord: tbrecord {
+  log_dir: "eva/runs/gym_STAR/Fix-v1__ppo_normalizeLayer__2200__1682866202"
+  save: true
+}
+control {
+  relay_id: "e5880e3d456f4807ae6d263d58bf6b75"
+}
+_info {
+  stream_id: "9wyt5rui"
+}
+
+2023-04-30 22:50:23,181 DEBUG   HandlerThread:22972 [config_util.py:dict_from_config_file():103] no default config file found in config-defaults.yaml
+2023-04-30 22:50:26,198 DEBUG   HandlerThread:22972 [handler.py:handle_request():144] handle_request: status_report
+2023-04-30 22:50:26,198 DEBUG   SenderThread:22972 [sender.py:send_request():363] send_request: status_report
+2023-04-30 22:50:27,989 DEBUG   Thread-29 :22972 [tb_watcher.py:_process_events():274] Encountered tensorboard directory watcher error: [WinError 1314] 客户端没有所需的特权。: 'D:\\PycharmProjects\\PPOimplementation\\eva\\runs\\gym_STAR\\Fix-v1__ppo_normalizeLayer__2200__1682866202\\events.out.tfevents.1682866223.DESKTOP-RPOI2A1.18540.0' -> 'D:\\PycharmProjects\\PPOimplementation\\wandb\\offline-run-20230430_225010-9wyt5rui\\files\\events.out.tfevents.1682866223.DESKTOP-RPOI2A1.18540.0'

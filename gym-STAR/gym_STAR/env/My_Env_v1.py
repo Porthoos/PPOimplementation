@@ -37,7 +37,7 @@ class My_Env(gym.Env):
         self.K = 6    #total users
 
         self.M = 4                  #antenna number
-        self.N = 25                 #STAR-RIS element number
+        self.N = 10                 #STAR-RIS element number
         self.N_h = 5                #horizontal element number
         self.N_v = self.N/self.N_h  #vertical element number
 
@@ -268,7 +268,7 @@ class My_Env(gym.Env):
         if self.render_mode == "human":
             self.render_frame()
 
-        return np.array([next_state]).astype(np.float32), self.sum_rate, False, done, {}
+        return np.array([next_state]).astype(np.float32), self.sum_rate, False, done, {"rate": self.data_rate_list, "type": self.type}
 
 
     #TODO reset the environmrnt, user position, time, observation state, STAR position???

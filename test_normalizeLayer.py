@@ -21,6 +21,8 @@ device = torch.device("cpu")
 n = 3
 steps = 0
 reward = 0
+infos = []
+count = 0
 for _ in range(n):
     done = False
     gamma = 1
@@ -29,7 +31,11 @@ for _ in range(n):
     while not done:
         steps += 1
         action, logprob, _ = actor.get_action(torch.unsqueeze(torch.Tensor(s), 0))
-        s_, r, terminated, truncated, _ = env.step(torch.Tensor(action))
+        s_, r, terminated, truncated, info = env.step(torch.Tensor(action))
+        # infos[count] = info
+        # count += 1
+        infos.append(np.array(info["rate"]))
+        count += 1
         # s_ = (s_ - mean) / np.sqrt(1e-8 + var)
         print(r)
         s = s_
@@ -39,3 +45,4 @@ for _ in range(n):
     print(reward)
 
 env.close()
+np.save("infos", infos)

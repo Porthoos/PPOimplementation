@@ -1,0 +1,13 @@
+diff --git a/ppo_normalizeLayer.py b/ppo_normalizeLayer.py
+index 7a41adc..3b0c1a1 100644
+--- a/ppo_normalizeLayer.py
++++ b/ppo_normalizeLayer.py
+@@ -38,7 +38,7 @@ def parse_args():
+         help="whether to capture videos of the agent performances (check out `videos` folder)")
+ 
+     # Algorithm specific arguments
+-    parser.add_argument("--env-id", type=str, default="gym_STAR/Fix-v1",
++    parser.add_argument("--env-id", type=str, default="gym_STAR/My_Env-v1",
+         help="the id of the environment")
+     parser.add_argument("--total-timesteps", type=int, default=25000000,
+         help="total timesteps of the experiments")

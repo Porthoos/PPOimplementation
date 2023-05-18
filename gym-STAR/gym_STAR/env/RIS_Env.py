@@ -78,9 +78,9 @@ class RIS_Env(gym.Env):
         self.STAR_position = [0, 0, 10]
         self.link_position = [0, 0, 0]
         self.type = np.zeros(shape=(self.K, 1))
-        self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
-        self.P_K_list[:, :3] += 200
-        self.P_K_list[:, 3:] -= 200
+        self.P_K_list = np.random.uniform(low=-500, high=500, size=(3, self.K))
+        # self.P_K_list[:, :3] += 200
+        # self.P_K_list[:, 3:] -= 200
         self.P_K_list[2, :] = 0
         self.t = 0
 
@@ -268,9 +268,8 @@ class RIS_Env(gym.Env):
     #TODO reset the environmrnt, user position, time, observation state, STAR position???
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.P_K_list = np.random.normal(scale=100, size=(3, self.K))
-        self.P_K_list[:, :3] += 200
-        self.P_K_list[:, 3:] -= 200
+        self.P_K_list = np.random.uniform(low=-500, high=500, size=(3, self.K))
+        # self.P_K_list[:, :] -= 500
         self.P_K_list[2, :] = 0
 
         # self.FD_B_K = np.random.normal(scale=1, size=(self.M, self.K, self.T)) + np.random.normal(scale=1, size=(self.M, self.K, self.T)) * 1j
